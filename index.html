@@ -1,77 +1,77 @@
 <!DOCTYPE html>
-<html язык="ру">
-<голова>
-  <мета набор символов="УТФ-8">
-  <мета имя="область просмотра" содержание="ширина=ширина устройства, начальный масштаб=1.0, масштабируемый пользователем=нет">
-  <заголовок>Удостоверение Личности ПГТ Нижний Исток</заголовок>
-  <сценарий источник="https://telegram.org/js/telegram-web-app.js"></сценарий>
-  <стиль>
-    :корень {
-      --bg-цвет: #121417;
-      --карта-bg: #e4dfd3;
-      --цвет-штампа: #2b3a67;
-      --секретный-цвет: #8b0000;
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Удостоверение Личности ПГТ Нижний Исток</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-color: #121417;
+      --card-bg: #e4dfd3;
+      --stamp-color: #2b3a67;
+      --secret-color: #8b0000;
     }
-    тело {
-      цвет фона: вар(--bg-цвет);
-      отображать: сгибать;
-      оправдать-содержание: центр;
-      выравнивание элементов: центр;
-      мин-высота: 100вх;
-      маржа: 0;
-      перспектива: 1000пх;
-      семейство шрифтов: «Курьер Новый», моноширинный;
-      переполнение: скрытый;
-      сенсорное действие: никто;
+    body {
+      background-color: var(--bg-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      perspective: 1000px;
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+      touch-action: none;
     }
-    .паспорт-контейнер {
-      ширина: 320пх;
-      высота: 480пх;
-      фон: вар(--карта-bg);
-      радиус границы: 12пх;
-      тень от ящика: 0 20пх 40пх ргба(0,0,0,0,8), вставка 0 0 100пх ргба(0,0,0,0,1);
-      позиция: родственник;
-      трансформационный стиль: сохранить-3d;
-      переход: трансформировать 0,1s ослабление;
-      граница: 2пх твердый #5а544б;
-      выбор пользователя: никто;
-      прокладка: 20пх;
-      размер коробки: пограничная коробка;
-      фоновое изображение: радиальный градиент(#d5cebf 15%, прозрачный 16%);
-      размер фона: 16пх 16пх;
+    .passport-container {
+      width: 320px;
+      height: 480px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 100px rgba(0,0,0,0.1);
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+      border: 2px solid #5a544b;
+      user-select: none;
+      padding: 20px;
+      box-sizing: border-box;
+      background-image: radial-gradient(#d5cebf 15%, transparent 16%);
+      background-size: 16px 16px;
     }
-    .заголовок {
-      выравнивание текста: центр;
-      размер шрифта: 11пх;
-      вес шрифта: смелый;
-      граница-дно: 2пх твердый #333;
-      набивка-дно: 8пх;
-      межбуквенный интервал: 1пх;
+    .header {
+      text-align: center;
+      font-size: 11px;
+      font-weight: bold;
+      border-bottom: 2px solid #333;
+      padding-bottom: 8px;
+      letter-spacing: 1px;
     }
-    .фоторамка {
-      ширина: 100пх;
-      высота: 120пх;
-      граница: 1пх пунктирная #444;
-      край-верх: 15пх;
-      фон: #ccc;
-      отображать: сгибать;
-      выравнивание элементов: центр;
-      оправдать-содержание: центр;
-      размер шрифта: 11пх;
-      фильтр: оттенки серого(100%) контраст(120%);
+    .photo-frame {
+      width: 100px;
+      height: 120px;
+      border: 1px dashed #444;
+      margin-top: 15px;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      filter: grayscale(100%) contrast(120%);
     }
-    .поля {
-      край-верх: 15пх;
-      размер шрифта: 13пх;
-      высота линии: 1.6;
+    .fields {
+      margin-top: 15px;
+      font-size: 13px;
+      line-height: 1.6;
     }
-    .кнопка уплотнения {
-      позиция: абсолютный;
-      нижний: 25пх;
-      верно: 25пх;
-      ширина: 80пх;
-      высота: 80пх;
-      радиус границы: 50%;
+    .seal-button {
+      position: absolute;
+      bottom: 25px;
+      right: 25px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
       border: 2px dashed var(--stamp-color);
       display: flex;
       align-items: center;
@@ -120,60 +120,60 @@
     </div>
   </div>
 
-<!DOCTYPE html><див класс="поля" стиль="край-верх: 20пх;">
-    <див><сильный>ГРАЖДАНИН:</сильный> <охватывать идентификатор="pName">Житель посёлка</охватывать></див>
-    <див><сильный>ПРОФЕССИЯ:</сильный> <охватывать идентификатор="пПроф">Радиомеханик</охватывать></див>
-    <див><сильный>СТАТУС:</сильный> <охватывать стиль="цвет: зеленый;">БЛАГОНАДЁЖЕН</охватывать></див>
-  </див>
+  <div class="fields" style="margin-top: 20px;">
+    <div><strong>ГРАЖДАНИН:</strong> <span id="pName">Житель посёлка</span></div>
+    <div><strong>ПРОФЕССИЯ:</strong> <span id="pProf">Радиомеханик</span></div>
+    <div><strong>СТАТУС:</strong> <span style="color: green;">БЛАГОНАДЁЖЕН</span></div>
+  </div>
 
-  <див класс="кнопка уплотнения" идентификатор="секретная печать">
- ОТДЕЛ КАДРОВ<бр>ЖЭК №1<бр>★
- </див>
+  <div class="seal-button" id="secretSeal">
+    ОТДЕЛ КАДРОВ<br>ЖЭК №1<br>★
+  </div>
 
-  <див класс="бюро-наложение" идентификатор="секретныйСлой">
+  <div class="bureau-overlay" id="secretLayer">
     <h3>[БЮРО ПАРАДИГМАЛЬНЫХ ИССЛЕДОВАНИЙ]</h3>
     <p>ФОРМА ДОПУСКА: КАТЕГОРИЯ «СМУТА»</p>
     <p>ОБЪЕКТ: СУБЪЕКТ СТАБИЛЕН ПОД КУПОЛОМ.</p>
     <p>ПРЕДУПРЕЖДЕНИЕ: НЕ СМОТРИТЕ НА РАДИОМАЧТУ В 03:00.</p>
-    <маленький стиль="цвет: #888; край-верх: 15пх;">Двойной клик, чтобы вернуть Иллюзию</маленький>
-  </див>
-</див>
+    <small style="color: #888; margin-top: 15px;">Двойной клик, чтобы вернуть Иллюзию</small>
+  </div>
+</div>
 
-<сценарий>
- если (окно.Телеграмма && окно.Телеграмма.Веб-приложение) {
- константа тг = окно.Телеграмма.Веб-приложение;
- тг.готовый();
- тг.расширять();
- константа пользователь = тг.initDataUnsafe?.поьзователь;
- если (пользователь) {
- документ.getElementById('pName').венутреннийТекст = поулзьводатель.имя_имя + (ползьводатель.фамилилилия_имѼя ? ' ' + пользователь.фамилия_имя : '');
+<script>
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+      document.getElementById('pName').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
     }
   }
 
- конснссттанта картt = дкумент.getElementById(«kðrt»);
- константа тюлень = дѾумент.getElementById(«скретняяя пѵчать»);
- константа секретныйСŻѾй = дѾуmünt.getElementById('секреттыйСŻѾѹ');
- включить holdTimer;
+  const card = document.getElementById('card');
+  const seal = document.getElementById('secretSeal');
+  const secretLayer = document.getElementById('secretLayer');
+  let holdTimer;
 
- окно.addEventListener(«указательный ход», (e) => {
- константа x = (окно.внутренняяяШирина / 2 - е.клиентX) / 12;
- константа y = (окно.внутренняяВысѾЂа / 2 - е.клиентура) / 12;
- карта.стиль.трансформировать = `ВРАЩАЮЩИЙСЯ(${-x}грд) врѰщатьX(${y}грдус)`;
- });
+  window.addEventListener('pointermove', (e) => {
+    const x = (window.innerWidth / 2 - e.clientX) / 12;
+    const y = (window.innerHeight / 2 - e.clientY) / 12;
+    card.style.transform = `rotateY(${-x}deg) rotateX(${y}deg)`;
+  });
 
- тюлень.addEventListener('указать вниз', () => {
- holdTimer = setTimeout(() => {
- секретныйСлой.стиль.отображать = 'гибкий';
- если (навигатор.вибрировать) навигатор.вибрировать([100, 50, 100]);
- }, 2500);
- });
+  seal.addEventListener('pointerdown', () => {
+    holdTimer = setTimeout(() => {
+      secretLayer.style.display = 'flex';
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }, 2500);
+  });
 
- tylen.addEventListener('указал верх', () => clearTimeout(holdTimer));
- тулен.addEventListener('указал-лиф', () => clearTimeout(holdTimer));
+  seal.addEventListener('pointerup', () => clearTimeout(holdTimer));
+  seal.addEventListener('pointerleave', () => clearTimeout(holdTimer));
 
- секретныйСлой.addEventListener('dblclick', () => {
- секретныйСлой.стиль.отображать = «нет»;
- });
-</сценарий>
-</тело>
- </html>
+  secretLayer.addEventListener('dblclick', () => {
+    secretLayer.style.display = 'none';
+  });
+</script>
+</body>
+</html>
