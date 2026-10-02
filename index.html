@@ -5,72 +5,179 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Удостоверение Личности ПГТ Нижний Исток</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
-      --bg-color: #121417;
-      --card-bg: #e4dfd3;
+      --bg-color: #0d0f12;
+      --card-bg: #e6e0d2;
       --stamp-color: #2b3a67;
-      --secret-color: #8b0000;
+      --pencil-color: #55524c;
     }
+    * { box-sizing: border-box; }
     body {
       background-color: var(--bg-color);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       margin: 0;
-      perspective: 1000px;
-      font-family: 'Courier New', monospace;
+      perspective: 1200px;
+      font-family: 'Courier New', Courier, monospace;
       overflow: hidden;
       touch-action: none;
+      user-select: none;
     }
-    .passport-container {
+
+    /* 3D Сцена */
+    .scene {
       width: 320px;
       height: 480px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 100px rgba(0,0,0,0.1);
       position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease-out;
-      border: 2px solid #5a544b;
-      user-select: none;
-      padding: 20px;
-      box-sizing: border-box;
-      background-image: radial-gradient(#d5cebf 15%, transparent 16%);
-      background-size: 16px 16px;
     }
+    .card-wrap {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      border-radius: 14px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.85);
+    }
+    .card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    /* Лицевая сторона (Бланк) */
+    .card-front {
+      background: var(--card-bg);
+      border: 2px solid #5a544b;
+      padding: 18px;
+      background-image: radial-gradient(#d3cbba 15%, transparent 16%);
+      background-size: 14px 14px;
+      transform: rotateY(0deg);
+    }
+
+    /* Блик ламината */
+    .glare {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.25) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.25) 55%, transparent 80%);
+      pointer-events: none;
+      z-index: 10;
+      mix-blend-mode: overlay;
+      opacity: 0.7;
+    }
+
+    /* Голографическая защитная полоса */
+    .hologram-strip {
+      position: absolute;
+      top: 0;
+      left: 12px;
+      width: 10px;
+      height: 100%;
+      background: linear-gradient(180deg, #ff0080, #7928ca, #0070f3, #00dfd8, #7928ca, #ff0080);
+      background-size: 100% 300%;
+      opacity: 0.35;
+      mix-blend-mode: color-dodge;
+      animation: holoShift 6s ease infinite;
+      pointer-events: none;
+      z-index: 5;
+    }
+    @keyframes holoShift {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 0% 100%; }
+      100% { background-position: 0% 0%; }
+    }
+
+    /* Заголовок */
     .header {
       text-align: center;
       font-size: 11px;
       font-weight: bold;
       border-bottom: 2px solid #333;
-      padding-bottom: 8px;
+      padding-bottom: 6px;
       letter-spacing: 1px;
+      cursor: pointer;
     }
-    .photo-frame {
+
+    /* Фотография */
+    .photo-area {
+      position: relative;
       width: 100px;
       height: 120px;
       border: 1px dashed #444;
-      margin-top: 15px;
-      background: #ccc;
+      background: #c2beb4;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
-      filter: grayscale(100%) contrast(120%);
+      cursor: pointer;
+      overflow: hidden;
+      margin-top: 14px;
     }
+    .photo-area img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(130%) brightness(90%);
+    }
+    .photo-placeholder {
+      font-size: 10px;
+      color: #555;
+      text-align: center;
+      padding: 6px;
+    }
+
+    /* Поля бланка */
     .fields {
-      margin-top: 15px;
-      font-size: 13px;
-      line-height: 1.6;
+      font-size: 12px;
+      line-height: 1.55;
     }
-    .seal-button {
+    .editable-field {
+      border-bottom: 1px dashed #777;
+      cursor: pointer;
+      padding: 1px 3px;
+    }
+    .editable-field:hover {
+      background: rgba(0,0,0,0.05);
+    }
+
+    /* Карандашная пометка */
+    .pencil-note {
+      position: absolute;
+      top: 175px;
+      right: 18px;
+      font-family: 'Brush Script MT', 'Caveat', cursive, sans-serif;
+      font-size: 13px;
+      color: var(--pencil-color);
+      transform: rotate(-7deg);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    /* Отпечаток пальца */
+    .fingerprint {
       position: absolute;
       bottom: 25px;
-      right: 25px;
-      width: 80px;
-      height: 80px;
+      left: 20px;
+      width: 55px;
+      height: 70px;
+      opacity: 0.28;
+      pointer-events: none;
+      filter: contrast(150%);
+    }
+
+    /* Печать ЖЭК */
+    .seal-button {
+      position: absolute;
+      bottom: 22px;
+      right: 20px;
+      width: 82px;
+      height: 82px;
       border-radius: 50%;
       border: 2px dashed var(--stamp-color);
       display: flex;
@@ -81,98 +188,538 @@
       color: var(--stamp-color);
       cursor: pointer;
       transform: rotate(-15deg);
+      background: rgba(43, 58, 103, 0.03);
+      z-index: 6;
     }
+
+    /* Оборотная сторона (Кожаная обложка) */
+    .card-back {
+      background: #2a1b14;
+      border: 3px solid #140d0a;
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 80%),
+        repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 4px);
+    }
+    .leather-stitch {
+      position: absolute;
+      inset: 8px;
+      border: 1px dashed rgba(184, 134, 11, 0.35);
+      border-radius: 10px;
+      pointer-events: none;
+    }
+    .leather-crest-box {
+      width: 140px;
+      height: 140px;
+      border: 2px solid rgba(184, 134, 11, 0.25);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.7), 0 1px 1px rgba(255,255,255,0.05);
+      color: rgba(184, 134, 11, 0.3);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+
+    /* Ультрафиолетовый режим */
+    .uv-active {
+      filter: drop-shadow(0 0 20px #8a2be2) !important;
+    }
+    .uv-active .card-front {
+      background: #110d1a !important;
+      color: #9d8ec2 !important;
+      background-image: none !important;
+    }
+    .uv-glow {
+      display: none;
+      position: absolute;
+      color: #00ffcc;
+      font-size: 11px;
+      font-weight: bold;
+      text-shadow: 0 0 8px #00ffcc;
+      pointer-events: none;
+    }
+    .uv-active .uv-glow { display: block; }
+
+    /* Панель кнопок снизу */
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+      z-index: 20;
+    }
+    .btn {
+      background: #1f2329;
+      color: #cfd3dc;
+      border: 1px solid #3d4450;
+      padding: 8px 14px;
+      font-family: inherit;
+      font-size: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:active { background: #2a303a; transform: translateY(1px); }
+
+    /* Модальное окно редактирования */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #e6e0d2;
+      border: 2px solid #333;
+      padding: 20px;
+      width: 100%;
+      max-width: 300px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #222;
+    }
+    .modal-box select, .modal-box input {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0 15px 0;
+      font-family: inherit;
+      border: 1px solid #444;
+      background: #f7f5ef;
+    }
+    .modal-box button {
+      width: 100%;
+      padding: 8px;
+      background: #2b3a67;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* Секретный слой Бюро при удержании */
     .bureau-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(10, 10, 15, 0.95);
-      color: #ff3333;
-      padding: 20px;
-      border-radius: 12px;
+      background: rgba(8, 8, 12, 0.96);
+      color: #ff3838;
+      padding: 22px;
+      border-radius: 14px;
       display: none;
       flex-direction: column;
       justify-content: center;
-      font-size: 12px;
-      box-sizing: border-box;
+      font-size: 11px;
+      z-index: 30;
       animation: glitch 0.2s infinite;
     }
     @keyframes glitch {
       0% { transform: translate(0) }
-      20% { transform: translate(-2px, 2px) }
-      40% { transform: translate(-2px, -2px) }
-      60% { transform: translate(2px, 2px) }
-      80% { transform: translate(2px, -2px) }
+      20% { transform: translate(-2px, 1px) }
+      40% { transform: translate(1px, -2px) }
+      60% { transform: translate(-1px, 2px) }
+      80% { transform: translate(2px, -1px) }
       100% { transform: translate(0) }
     }
   </style>
 </head>
 <body>
 
-<div class="passport-container" id="card">
-  <div class="header">ПГТ НИЖНИЙ ИСТОК • ВРЕМЕННОЕ УДОСТОВЕРЕНИЕ</div>
-  
-  <div style="display: flex; gap: 15px;">
-    <div class="photo-frame" id="avatarBox">ФОТО</div>
-    <div class="fields">
-      <div><strong>СЕРИЯ:</strong> ИСТ-79</div>
-      <div><strong>НОМЕР:</strong> 049281</div>
-      <div><strong>ПРОПИСКА:</strong> Ул. Строителей, 12</div>
+<div class="scene" id="sceneContainer">
+  <div class="card-wrap" id="card">
+    
+    <!-- ЛИЦЕВАЯ СТОРОНА -->
+    <div class="card-face card-front" id="passportFront">
+      <div class="glare" id="glareReflect"></div>
+      <div class="hologram-strip"></div>
+      
+      <div class="header" id="headerTitle">ПГТ НИЖНИЙ ИСТОК • ВРЕМЕННОЕ УДОСТОВЕРЕНИЕ</div>
+      
+      <div style="display: flex; gap: 14px;">
+        <div class="photo-area" id="photoTrigger" title="Нажмите, чтобы загрузить фото">
+          <img id="userPhoto" style="display: none;" alt="Фото">
+          <div class="photo-placeholder" id="photoPlaceholder">ФОТО<br><span style="font-size:8px;">[нажмите]</span></div>
+        </div>
+        
+        <div class="fields" style="margin-top: 14px;">
+          <div><strong>СЕРИЯ:</strong> <span id="pSeries">ИСТ-79</span></div>
+          <div><strong>НОМЕР:</strong> <span id="pNumber">049281</span></div>
+          <div style="margin-top: 6px;">
+            <strong>ПРОПИСКА:</strong><br>
+            <span class="editable-field" id="pAddress">Ул. Строителей, д. 12</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pencil-note" id="pencilAnnotation">«рейс №14 — прибыл»</div>
+
+      <div class="fields" style="margin-top: 18px;">
+        <div><strong>ГРАЖДАНИН:</strong> <span id="pName">Житель посёлка</span></div>
+        <div style="margin-top: 6px;">
+          <strong>ПРОФЕССИЯ:</strong><br>
+          <span class="editable-field" id="pProf">Радиомеханик узла связи</span>
+        </div>
+        <div style="margin-top: 8px;"><strong>СТАТУС:</strong> <span style="color: #2e7d32;" id="pStatusText">БЛАГОНАДЁЖЕН</span></div>
+      </div>
+
+      <!-- Отпечаток пальца -->
+      <svg class="fingerprint" viewBox="0 0 24 24" fill="none" stroke="#2b3a67" stroke-width="1.2">
+        <path d="M12 2a10 10 0 0 0-7 17.1M12 6a6 6 0 0 0-4 10.4M12 10a2 2 0 0 0-2 2v6M16 11v7M19 14v4M12 2v2M8 4a8 8 0 0 1 8 0M5 8a9 9 0 0 1 14 0"/>
+      </svg>
+
+      <!-- Печать ЖЭК -->
+      <div class="seal-button" id="secretSeal">
+        ОТДЕЛ КАДРОВ<br>ЖЭК №1<br>★
+      </div>
+
+      <!-- УФ Скрытые метки (видны только в УФ) -->
+      <div class="uv-glow" style="top: 85px; right: 25px;">[СЕКТОР-4: ИЛЛЮЗИЯ СТАБИЛЬНА]</div>
+      <div class="uv-glow" style="bottom: 110px; left: 25px;">КУРАТОР БЮРО: #09</div>
+
+      <!-- Скрытый слой Бюро -->
+      <div class="bureau-overlay" id="secretLayer">
+        <h3>[БЮРО ПАРАДИГМАЛЬНЫХ ИССЛЕДОВАНИЙ]</h3>
+        <p>ФОРМА ДОПУСКА: КАТЕГОРИЯ «СМУТА»</p>
+        <p>ОБЪЕКТ: СУБЪЕКТ УДЕРЖИВАЕТСЯ В СЕТКЕ ВЕЩАНИЯ.</p>
+        <p>ИНСТРУКЦИЯ: ИГНОРИРУЙТЕ НОЧНЫЕ СТУКИ В ОКНА.</p>
+        <small style="color: #888; margin-top: 15px;">Двойной клик, чтобы свернуть протокол</small>
+      </div>
     </div>
-  </div>
 
-  <div class="fields" style="margin-top: 20px;">
-    <div><strong>ГРАЖДАНИН:</strong> <span id="pName">Житель посёлка</span></div>
-    <div><strong>ПРОФЕССИЯ:</strong> <span id="pProf">Радиомеханик</span></div>
-    <div><strong>СТАТУС:</strong> <span style="color: green;">БЛАГОНАДЁЖЕН</span></div>
-  </div>
+    <!-- ОБОРОТНАЯ СТОРОНА (КОЖАНАЯ ОБЛОЖКА) -->
+    <div class="card-face card-back">
+      <div class="leather-stitch"></div>
+      <div class="leather-crest-box">
+        <div>[ МЕСТО ДЛЯ ГЕРБА ]</div>
+        <div style="font-size: 8px; margin-top: 6px; opacity: 0.6;">НИЖНИЙ ИСТОК</div>
+      </div>
+    </div>
 
-  <div class="seal-button" id="secretSeal">
-    ОТДЕЛ КАДРОВ<br>ЖЭК №1<br>★
   </div>
+</div>
 
-  <div class="bureau-overlay" id="secretLayer">
-    <h3>[БЮРО ПАРАДИГМАЛЬНЫХ ИССЛЕДОВАНИЙ]</h3>
-    <p>ФОРМА ДОПУСКА: КАТЕГОРИЯ «СМУТА»</p>
-    <p>ОБЪЕКТ: СУБЪЕКТ СТАБИЛЕН ПОД КУПОЛОМ.</p>
-    <p>ПРЕДУПРЕЖДЕНИЕ: НЕ СМОТРИТЕ НА РАДИОМАЧТУ В 03:00.</p>
-    <small style="color: #888; margin-top: 15px;">Двойной клик, чтобы вернуть Иллюзию</small>
+<!-- Кнопки управления -->
+<div class="controls">
+  <button class="btn" id="flipBtn">🔄 Перевернуть</button>
+  <button class="btn" id="exportBtn">📸 Сохранить фото</button>
+</div>
+
+<!-- Скрытый инпут для фото -->
+<input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+<!-- Модальное окно настройки данных -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <strong id="modalTitle">Регистрация в картотеке</strong>
+    <p style="font-size: 11px; color: #555; margin: 8px 0;">Внимание: данные вносятся в реестр посёлка один раз. После заверения изменить их сможет только диспетчер ЖЭК.</p>
+    
+    <label id="modalFieldLabel">Выберите профессию:</label>
+    <select id="modalSelect"></select>
+    <input type="text" id="modalCustomInput" placeholder="Или впишите свой вариант..." style="display: none;">
+
+    <button id="modalSaveBtn">Заверить данные в ЖЭК</button>
   </div>
 </div>
 
 <script>
+  // 1. Инициализация звукового движка Web Audio API
+  let audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playPaperRustle() {
+    const ctx = getAudioContext();
+    const bufferSize = ctx.sampleRate * 0.15;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.04));
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200;
+    noise.connect(filter);
+    filter.connect(ctx.destination);
+    noise.start();
+  }
+
+  function playStampThud() {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.setValueAtTime(140, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.7, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.13);
+  }
+
+  let humOsc = null;
+  function startTowerHum() {
+    const ctx = getAudioContext();
+    humOsc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    humOsc.type = 'sawtooth';
+    humOsc.frequency.setValueAtTime(54, ctx.currentTime);
+    gain.gain.setValueAtTime(0.01, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 2.0);
+    humOsc.connect(gain);
+    gain.connect(ctx.destination);
+    humOsc.start();
+  }
+  function stopTowerHum() {
+    if (humOsc) {
+      try { humOsc.stop(); humOsc.disconnect(); } catch(e){}
+      humOsc = null;
+    }
+  }
+
+  // 2. Индивидуальный номер и имя по TG
+  let tgUser = null;
   if (window.Telegram && window.Telegram.WebApp) {
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    const user = tg.initDataUnsafe?.user;
-    if (user) {
-      document.getElementById('pName').innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-    }
+    tgUser = tg.initDataUnsafe?.user;
   }
 
+  const rawId = tgUser?.id || (localStorage.getItem('istok_mock_id') || Math.floor(100000 + Math.random() * 900000));
+  if (!tgUser) localStorage.setItem('istok_mock_id', rawId);
+
+  const calculatedSeries = 'ИСТ-' + ((Math.abs(Number(rawId)) % 80) + 15);
+  const calculatedNumber = String(Math.abs(Number(rawId)) % 1000000).padStart(6, '0');
+  document.getElementById('pSeries').innerText = calculatedSeries;
+  document.getElementById('pNumber').innerText = calculatedNumber;
+
+  if (tgUser) {
+    document.getElementById('pName').innerText = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+  }
+
+  // 3. Пул случайных заметок карандашом
+  const notesPool = [
+    '«рейс №14 — прибыл»',
+    '«повторный опрос в чт.»',
+    '«инструмент сдан на склад»',
+    '«проверить узел связи»',
+    '«документы сверены / ЖЭК»',
+    '«справка №87 приложена»',
+    '«пропуск в бараки выдан»'
+  ];
+  let savedNote = localStorage.getItem('istok_pencil_note');
+  if (!savedNote) {
+    savedNote = notesPool[Math.floor(Math.random() * notesPool.length)];
+    localStorage.setItem('istok_pencil_note', savedNote);
+  }
+  document.getElementById('pencilAnnotation').innerText = savedNote;
+
+  // 4. Загрузка сохраненных данных или дефолтов
+  const savedProf = localStorage.getItem('istok_prof');
+  const savedAddr = localStorage.getItem('istok_addr');
+  const isLocked = localStorage.getItem('istok_data_locked') === 'true';
+
+  if (savedProf) document.getElementById('pProf').innerText = savedProf;
+  if (savedAddr) document.getElementById('pAddress').innerText = savedAddr;
+
+  // 5. Загрузка фото в ч/б ретро
+  const photoTrigger = document.getElementById('photoTrigger');
+  const fileInput = document.getElementById('fileInput');
+  const userPhoto = document.getElementById('userPhoto');
+  const photoPlaceholder = document.getElementById('photoPlaceholder');
+
+  const savedPhoto = localStorage.getItem('istok_avatar');
+  if (savedPhoto) {
+    userPhoto.src = savedPhoto;
+    userPhoto.style.display = 'block';
+    photoPlaceholder.style.display = 'none';
+  }
+
+  photoTrigger.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 160;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 160, 200);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        userPhoto.src = dataUrl;
+        userPhoto.style.display = 'block';
+        photoPlaceholder.style.display = 'none';
+        localStorage.setItem('istok_avatar', dataUrl);
+        playStampThud();
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // 6. 3D вращение и поворот на 360° (переворот)
   const card = document.getElementById('card');
+  const flipBtn = document.getElementById('flipBtn');
+  let isFlipped = false;
+  let currentTiltX = 0, currentTiltY = 0;
+
+  function updateTransform() {
+    const flipDeg = isFlipped ? 180 : 0;
+    card.style.transform = `rotateY(${currentTiltX + flipDeg}deg) rotateX(${currentTiltY}deg)`;
+  }
+
+  window.addEventListener('pointermove', (e) => {
+    currentTiltX = (window.innerWidth / 2 - e.clientX) / 14;
+    currentTiltY = (window.innerHeight / 2 - e.clientY) / 14;
+    updateTransform();
+  });
+
+  flipBtn.addEventListener('click', () => {
+    isFlipped = !isFlipped;
+    playPaperRustle();
+    updateTransform();
+  });
+
+  // 7. Секретный режим ультрафиолета (3 клика по шапке)
+  const headerTitle = document.getElementById('headerTitle');
+  const sceneContainer = document.getElementById('sceneContainer');
+  let headerClicks = 0;
+  let headerClickTimer = null;
+
+  headerTitle.addEventListener('click', () => {
+    headerClicks++;
+    clearTimeout(headerClickTimer);
+    headerClickTimer = setTimeout(() => { headerClicks = 0; }, 600);
+    if (headerClicks >= 3) {
+      sceneContainer.classList.toggle('uv-active');
+      playStampThud();
+      headerClicks = 0;
+    }
+  });
+
+  // 8. Удержание печати ЖЭК (вызов протокола Бюро)
   const seal = document.getElementById('secretSeal');
   const secretLayer = document.getElementById('secretLayer');
   let holdTimer;
 
-  window.addEventListener('pointermove', (e) => {
-    const x = (window.innerWidth / 2 - e.clientX) / 12;
-    const y = (window.innerHeight / 2 - e.clientY) / 12;
-    card.style.transform = `rotateY(${-x}deg) rotateX(${y}deg)`;
-  });
-
   seal.addEventListener('pointerdown', () => {
+    startTowerHum();
     holdTimer = setTimeout(() => {
       secretLayer.style.display = 'flex';
-      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    }, 2500);
+      playStampThud();
+      if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+    }, 2400);
   });
 
-  seal.addEventListener('pointerup', () => clearTimeout(holdTimer));
-  seal.addEventListener('pointerleave', () => clearTimeout(holdTimer));
+  const clearHold = () => { clearTimeout(holdTimer); stopTowerHum(); };
+  seal.addEventListener('pointerup', clearHold);
+  seal.addEventListener('pointerleave', clearHold);
+  secretLayer.addEventListener('dblclick', () => { secretLayer.style.display = 'none'; });
 
-  secretLayer.addEventListener('dblclick', () => {
-    secretLayer.style.display = 'none';
+  // 9. Однократное редактирование роли и прописки
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalSelect = document.getElementById('modalSelect');
+  const modalSaveBtn = document.getElementById('modalSaveBtn');
+  let editingTarget = null;
+
+  const profList = [
+    'Радиомеханик узла связи',
+    'Фельдшер больницы №2',
+    'Слесарь ЖЭК №1',
+    'Продавец универмага',
+    'Кочегар котельной №3',
+    'Библиотекарь ДК «Строитель»',
+    'Водитель рейсового ПАЗа',
+    'Архивариус поссовета',
+    'Безработный житель'
+  ];
+
+  const addrList = [
+    'ул. Строителей, д. 12',
+    'ул. Строителей, д. 4',
+    'ул. Речная, д. 7',
+    'пер. Связистов, д. 2',
+    'Барачный сектор, дом 5',
+    'ул. Заводская, д. 18'
+  ];
+
+  function openEdit(type) {
+    if (localStorage.getItem('istok_data_locked') === 'true') {
+      alert('Данные уже заверены печатью ЖЭК №1.\nВнесение исправлений запрещено протоколом посёлка.\nДля смены обратитесь к диспетчеру.');
+      return;
+    }
+    editingTarget = type;
+    modalSelect.innerHTML = '';
+    const list = type === 'prof' ? profList : addrList;
+    modalTitle.innerText = type === 'prof' ? 'Регистрация специальности' : 'Регистрация прописки';
+
+    list.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item;
+      opt.innerText = item;
+      modalSelect.appendChild(opt);
+    });
+
+    modalBackdrop.style.display = 'flex';
+  }
+
+  document.getElementById('pProf').addEventListener('click', () => openEdit('prof'));
+  document.getElementById('pAddress').addEventListener('click', () => openEdit('addr'));
+
+  modalSaveBtn.addEventListener('click', () => {
+    const val = modalSelect.value;
+    if (editingTarget === 'prof') {
+      document.getElementById('pProf').innerText = val;
+      localStorage.setItem('istok_prof', val);
+    } else {
+      document.getElementById('pAddress').innerText = val;
+      localStorage.setItem('istok_addr', val);
+    }
+
+    // Если оба поля настроены или сохранено одно — ставим блокировку
+    localStorage.setItem('istok_data_locked', 'true');
+    modalBackdrop.style.display = 'none';
+    playStampThud();
+  });
+
+  // 10. Экспорт удостоверения в фото (html2canvas)
+  const exportBtn = document.getElementById('exportBtn');
+  exportBtn.addEventListener('click', () => {
+    // Временно выравниваем карту прямо для идеального рендера
+    const originalTransform = card.style.transform;
+    card.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+
+    const targetElement = isFlipped ? document.querySelector('.card-back') : document.getElementById('passportFront');
+
+    html2canvas(targetElement, { scale: 2, useCORS: true }).then(canvas => {
+      card.style.transform = originalTransform;
+      const link = document.createElement('a');
+      link.download = `Паспорт_Исток_${calculatedNumber}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      playStampThud();
+    });
   });
 </script>
 </body>
