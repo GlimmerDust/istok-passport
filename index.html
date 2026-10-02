@@ -75,18 +75,18 @@
       opacity: 0.65;
     }
 
-    /* Голографическая защитная полоса */
+    /* Голографическая защитная полоса справа */
     .hologram-strip {
       position: absolute;
       top: 0;
-      left: 12px;
-      width: 10px;
+      right: 12px;
+      width: 12px;
       height: 100%;
       background: linear-gradient(180deg, #ff0080, #7928ca, #0070f3, #00dfd8, #7928ca, #ff0080);
       background-size: 100% 300%;
-      opacity: 0.35;
-      mix-blend-mode: color-dodge;
-      animation: holoShift 6s ease infinite;
+      opacity: 0.45;
+      mix-blend-mode: overlay;
+      animation: holoShift 5s ease infinite;
       pointer-events: none;
       z-index: 5;
     }
@@ -492,7 +492,6 @@
 
     if (Math.hypot(dx, dy) > 6) {
       hasDragged = true;
-      // Если начали крутить карточку, сбрасываем таймер вызова Бюро
       clearHold();
     }
 
@@ -649,12 +648,10 @@
     playStampThud();
   });
 
-  // 8. Экспорт в фото (определяет видимую сторону)
+  // 8. Экспорт в фото
   const exportBtn = document.getElementById('exportBtn');
   exportBtn.addEventListener('click', () => {
     const originalTransform = card.style.transform;
-    
-    // Определяем, какая сторона сейчас смотрит на пользователя
     const normalizedY = ((currentRotY % 360) + 360) % 360;
     const isBackFacing = normalizedY > 90 && normalizedY < 270;
 
