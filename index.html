@@ -8,15 +8,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
-      --bg-color: #0d0f12;
+      --bg-color: #0b0d10;
       --card-bg: #e6e0d2;
       --stamp-color: #2b3a67;
-      --leather-color: #24160f;
-      --card-depth: 8px; /* Реальная толщина удостоверения */
+      --leather-color: #22140d;
+      --card-depth: 8px;
     }
     * { box-sizing: border-box; }
     body {
-      background-color: var(--bg-color);
+      background: radial-gradient(circle at 50% 42%, #222933 0%, #0b0d10 75%);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -42,12 +42,11 @@
       position: absolute;
       transform-style: preserve-3d;
       border-radius: 12px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.85);
       cursor: grab;
+      transition: box-shadow 0.1s;
     }
     .card-wrap:active { cursor: grabbing; }
 
-    /* Лицевая и оборотная стороны с физическим разнесением */
     .card-face {
       position: absolute;
       inset: 0;
@@ -56,7 +55,7 @@
       overflow: hidden;
     }
 
-    /* Лицевая сторона (Бланк) вынесена вперед на половину толщины */
+    /* Лицевая сторона */
     .card-front {
       background: var(--card-bg);
       border: 2px solid #5a544b;
@@ -66,7 +65,7 @@
       transform: translateZ(calc(var(--card-depth) / 2));
     }
 
-    /* Оборотная сторона (Кожаная обложка) сдвинута назад */
+    /* Оборотная сторона (Кожаная обложка) */
     .card-back {
       background: var(--leather-color);
       border: 2px solid #140d0a;
@@ -81,7 +80,7 @@
         repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 2px, transparent 2px, transparent 4px);
     }
 
-    /* Физические торцы (рёбра корочки) */
+    /* 3D Торцы (Все 4 грани для цельного бруска) */
     .card-edge-left, .card-edge-right {
       position: absolute;
       top: 0;
@@ -99,6 +98,23 @@
       transform: rotateY(90deg);
     }
 
+    .card-edge-top, .card-edge-bottom {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: var(--card-depth);
+      background: #1a100c;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.9);
+    }
+    .card-edge-top {
+      top: calc(var(--card-depth) / -2);
+      transform: rotateX(90deg);
+    }
+    .card-edge-bottom {
+      bottom: calc(var(--card-depth) / -2);
+      transform: rotateX(-90deg);
+    }
+
     /* Блик ламината */
     .glare {
       position: absolute;
@@ -107,10 +123,10 @@
       pointer-events: none;
       z-index: 10;
       mix-blend-mode: overlay;
-      opacity: 0.65;
+      opacity: 0.7;
     }
 
-    /* Голографическая полоса справа */
+    /* Защитная полоса */
     .hologram-strip {
       position: absolute;
       top: 0;
@@ -142,7 +158,7 @@
       cursor: pointer;
     }
 
-    /* Фотография */
+    /* Фото */
     .photo-area {
       position: relative;
       width: 100px;
@@ -179,9 +195,9 @@
       cursor: pointer;
       padding: 1px 3px;
     }
-    .editable-field:hover { background: rgba(0,0,0,0.05); }
+    .editable-field:hover { background: rgba(0,0,0,0.06); }
 
-    /* Аутентичная резиновая печать ЖЭК (двойное кольцо) */
+    /* Печать ЖЭК */
     .seal-button {
       position: absolute;
       bottom: 22px;
@@ -215,12 +231,22 @@
       pointer-events: none;
     }
 
-    /* Оборотная сторона */
+    /* Задняя сторона: Золотое тиснение ПАСПОРТ */
     .leather-stitch {
       position: absolute;
       inset: 8px;
       border: 1px dashed rgba(184, 134, 11, 0.35);
       border-radius: 8px;
+      pointer-events: none;
+    }
+    .leather-title {
+      position: absolute;
+      top: 50px;
+      color: rgba(184, 134, 11, 0.55);
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 5px;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.1), 0 -1px 2px rgba(0,0,0,0.9);
       pointer-events: none;
     }
     .leather-crest-box {
@@ -237,16 +263,25 @@
       font-size: 10px;
       letter-spacing: 2px;
       text-align: center;
+      margin-top: 25px;
     }
 
     /* Ультрафиолетовый режим */
     .uv-active {
-      filter: drop-shadow(0 0 20px #8a2be2) !important;
+      filter: drop-shadow(0 0 22px rgba(138, 43, 226, 0.6)) !important;
     }
     .uv-active .card-front {
       background: #110d1a !important;
       color: #9d8ec2 !important;
       background-image: none !important;
+      border-color: #633299 !important;
+    }
+    .uv-active .card-edge-top,
+    .uv-active .card-edge-bottom,
+    .uv-active .card-edge-left,
+    .uv-active .card-edge-right {
+      background: #1c0d29 !important;
+      box-shadow: inset 0 0 5px #8a2be2 !important;
     }
     .uv-glow {
       display: none;
@@ -259,7 +294,6 @@
     }
     .uv-active .uv-glow { display: block; }
 
-    /* Диагональный люминесцентный штамп в УФ */
     .uv-diagonal-stamp {
       top: 215px;
       left: 10px;
@@ -273,8 +307,6 @@
       border-radius: 4px;
       background: rgba(0, 255, 204, 0.05);
     }
-
-    /* Нижний системный код */
     .uv-bottom-code {
       bottom: 28px;
       left: 20px;
@@ -304,11 +336,11 @@
     }
     .btn:active { background: #2a303a; transform: translateY(1px); }
 
-    /* Модалка */
+    /* Модальное окно */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.8);
       display: none;
       align-items: center;
       justify-content: center;
@@ -320,27 +352,29 @@
       border: 2px solid #333;
       padding: 20px;
       width: 100%;
-      max-width: 300px;
+      max-width: 310px;
       border-radius: 8px;
       font-size: 12px;
       color: #222;
     }
-    .modal-box select {
+    .modal-box input, .modal-box select {
       width: 100%;
-      padding: 8px;
+      padding: 9px;
       margin: 10px 0 15px 0;
       font-family: inherit;
       border: 1px solid #444;
       background: #f7f5ef;
+      font-size: 12px;
     }
     .modal-box button {
       width: 100%;
-      padding: 8px;
+      padding: 9px;
       background: #2b3a67;
       color: #fff;
       border: none;
       cursor: pointer;
       font-family: inherit;
+      font-weight: bold;
     }
 
     /* Секретный слой Бюро */
@@ -373,9 +407,11 @@
 <div class="scene" id="sceneContainer">
   <div class="card-wrap" id="card">
     
-    <!-- Физические рёбра толщины корочки -->
+    <!-- 4 Торца объемного паспорта -->
     <div class="card-edge-left"></div>
     <div class="card-edge-right"></div>
+    <div class="card-edge-top"></div>
+    <div class="card-edge-bottom"></div>
 
     <!-- ЛИЦЕВАЯ СТОРОНА -->
     <div class="card-face card-front" id="passportFront">
@@ -401,7 +437,10 @@
       </div>
 
       <div class="fields" style="margin-top: 26px;">
-        <div><strong>ГРАЖДАНИН:</strong> <span id="pName">Житель посёлка</span></div>
+        <div>
+          <strong>ГРАЖДАНИН:</strong><br>
+          <span class="editable-field" id="pName">Житель посёлка</span>
+        </div>
         <div style="margin-top: 8px;">
           <strong>ПРОФЕССИЯ:</strong><br>
           <span class="editable-field" id="pProf">Радиомеханик узла связи</span>
@@ -409,18 +448,18 @@
         <div style="margin-top: 10px;"><strong>СТАТУС:</strong> <span style="color: #2e7d32;" id="pStatusText">БЛАГОНАДЁЖЕН</span></div>
       </div>
 
-      <!-- Аутентичная резиновая печать ЖЭК -->
+      <!-- Резиновая печать ЖЭК -->
       <div class="seal-button" id="secretSeal">
         <div class="seal-inner-ring">
           ОТДЕЛ КАДРОВ<br>ЖЭК №1<br>★
         </div>
       </div>
 
-      <!-- Новые УФ-элементы: чистые, не перекрывающие текст -->
+      <!-- УФ Метки -->
       <div class="uv-glow uv-diagonal-stamp">[ ПЛОМБА №4 • ИЛЛЮЗИЯ СТАБИЛЬНА ]</div>
       <div class="uv-glow uv-bottom-code">ФОРМА УЧЁТА: СПЯЩИЙ • ЭФИР 94.7 МГц</div>
 
-      <!-- Скрытый слой Бюро -->
+      <!-- Секретный слой Бюро -->
       <div class="bureau-overlay" id="secretLayer">
         <h3>[БЮРО ПАРАДИГМАЛЬНЫХ ИССЛЕДОВАНИЙ]</h3>
         <p>ФОРМА ДОПУСКА: КАТЕГОРИЯ «СМУТА»</p>
@@ -430,9 +469,10 @@
       </div>
     </div>
 
-    <!-- ОБОРОТНАЯ СТОРОНА (КОЖАНАЯ ОБЛОЖКА) -->
+    <!-- ОБОРОТНАЯ СТОРОНА -->
     <div class="card-face card-back" id="passportBack">
       <div class="leather-stitch"></div>
+      <div class="leather-title">ПАСПОРТ</div>
       <div class="leather-crest-box">
         <div>[ МЕСТО ДЛЯ ГЕРБА ]</div>
         <div style="font-size: 8px; margin-top: 6px; opacity: 0.6;">НИЖНИЙ ИСТОК</div>
@@ -448,17 +488,19 @@
 
 <input type="file" id="fileInput" accept="image/*" style="display: none;">
 
+<!-- Универсальное модальное окно -->
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal-box">
     <strong id="modalTitle">Регистрация в картотеке</strong>
-    <p style="font-size: 11px; color: #555; margin: 8px 0;">Внимание: данные вносятся в реестр посёлка один раз. После заверения изменить их сможет только диспетчер ЖЭК.</p>
+    <p style="font-size: 11px; color: #555; margin: 8px 0;" id="modalDesc">Данные заверяются печатью ЖЭК один раз.</p>
     
-    <select id="modalSelect"></select>
+    <div id="modalInputContainer"></div>
     <button id="modalSaveBtn">Заверить данные в ЖЭК</button>
   </div>
 </div>
 
 <script>
+  // 1. Web Audio API
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -500,6 +542,7 @@
     }
   }
 
+  // 2. Инициализация пользователя
   let tgUser = null;
   if (window.Telegram && window.Telegram.WebApp) {
     const tg = window.Telegram.WebApp;
@@ -516,7 +559,11 @@
   document.getElementById('pSeries').innerText = calculatedSeries;
   document.getElementById('pNumber').innerText = calculatedNumber;
 
-  if (tgUser) {
+  // Восстановление полей из памяти
+  const savedName = localStorage.getItem('istok_name');
+  if (savedName) {
+    document.getElementById('pName').innerText = savedName;
+  } else if (tgUser) {
     document.getElementById('pName').innerText = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
   }
 
@@ -525,12 +572,23 @@
   if (savedProf) document.getElementById('pProf').innerText = savedProf;
   if (savedAddr) document.getElementById('pAddress').innerText = savedAddr;
 
+  // 3. 3D Вращение с легким стартовым наклоном (для видимого объёма с первых секунд)
   const card = document.getElementById('card');
   let isDragging = false;
   let startX = 0, startY = 0;
-  let currentRotY = 0, currentRotX = 0;
-  let prevRotY = 0, prevRotX = 0;
+  let currentRotY = -7; // Стартовый ракурс
+  let currentRotX = 4;
+  let prevRotY = -7;
+  let prevRotX = 4;
   let hasDragged = false;
+
+  function applyTransform() {
+    card.style.transform = `rotateY(${currentRotY}deg) rotateX(${currentRotX}deg)`;
+    const shadowX = -currentRotY * 1.5;
+    const shadowY = Math.max(15, 25 + currentRotX * 1.2);
+    card.style.boxShadow = `${shadowX}px ${shadowY}px 45px rgba(0,0,0,0.85), 0 0 1px rgba(255,255,255,0.08)`;
+  }
+  applyTransform();
 
   window.addEventListener('pointerdown', (e) => {
     if (e.target.closest('#modalBackdrop') || e.target.closest('#exportBtn')) return;
@@ -554,12 +612,13 @@
 
     currentRotY = prevRotY + dx * 0.75;
     currentRotX = Math.max(-35, Math.min(35, prevRotX - dy * 0.45));
-    card.style.transform = `rotateY(${currentRotY}deg) rotateX(${currentRotX}deg)`;
+    applyTransform();
   });
 
   window.addEventListener('pointerup', () => { isDragging = false; });
   window.addEventListener('pointercancel', () => { isDragging = false; });
 
+  // 4. Загрузка фото
   const photoTrigger = document.getElementById('photoTrigger');
   const fileInput = document.getElementById('fileInput');
   const userPhoto = document.getElementById('userPhoto');
@@ -600,6 +659,7 @@
     reader.readAsDataURL(file);
   });
 
+  // 5. УФ Режим (3 клика)
   const headerTitle = document.getElementById('headerTitle');
   const sceneContainer = document.getElementById('sceneContainer');
   let headerClicks = 0;
@@ -617,6 +677,7 @@
     }
   });
 
+  // 6. Удержание печати ЖЭК
   const seal = document.getElementById('secretSeal');
   const secretLayer = document.getElementById('secretLayer');
   let holdTimer;
@@ -636,11 +697,67 @@
   seal.addEventListener('pointerleave', clearHold);
   secretLayer.addEventListener('dblclick', () => { secretLayer.style.display = 'none'; });
 
+  // 7. Алгоритм фильтрации нецензурной лексики и оскорблений (RU + EN + Leet)
+  function isProfane(text) {
+    if (!text || text.trim().length === 0) return true;
+    let s = text.toLowerCase();
+
+    // Замена транслита, цифр и спецсимволов на стандартные буквы
+    const leetMap = {
+      '4': 'ч', '0': 'о', '1': 'и', '3': 'з', '6': 'б', '@': 'а', '$': 'с',
+      'y': 'у', 'u': 'у', 'k': 'к', 'p': 'р', 'c': 'с', 'x': 'х', 'e': 'е',
+      'a': 'а', 'o': 'о', 'b': 'б', 't': 'т', 'h': 'х', 'v': 'в', 'w': 'в'
+    };
+    s = s.split('').map(ch => leetMap[ch] || ch).join('');
+
+    // Удаляем любые разделители между буквами (звёздочки, точки, дефисы, пробелы)
+    s = s.replace(/[^а-яa-z]/g, '');
+
+    // Сжимаем повторяющиеся подряд буквы (например: хххуууййй -> хуй)
+    s = s.replace(/(.)\1+/g, '$1');
+
+    // Корни нецензурных слов и оскорблений (RU & EN)
+    const badPatterns = [
+      /ху[йиеяюеё]/,
+      /п[иеё]зд/,
+      /[её]б[аеиоул]/,
+      /бл[яе]/,
+      /м[уy]д[аa][кkч]/,
+      /г[аa]нд[оo]н/,
+      /с[уy][чч4][кkаa]/,
+      /с[уy][кk][аa]/,
+      /чм[оo]/,
+      /з[аa]л[уy]п/,
+      /г[оo]вн/,
+      /д[еe]рьм/,
+      /др[оo]ч/,
+      /шл[юy]х/,
+      /п[ие]д[оa]р/,
+      /х[еe]р/,
+      /тв[аa]рь/,
+      /fuck/,
+      /bitch/,
+      /shit/,
+      /cunt/,
+      /dick/,
+      /asshole/,
+      /whore/,
+      /bastard/,
+      /pussy/,
+      /cock/,
+      /fag/
+    ];
+
+    return badPatterns.some(rx => rx.test(s));
+  }
+
+  // 8. Раздельное редактирование: Имя, Профессия, Прописка
   const modalBackdrop = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
-  const modalSelect = document.getElementById('modalSelect');
+  const modalDesc = document.getElementById('modalDesc');
+  const modalInputContainer = document.getElementById('modalInputContainer');
   const modalSaveBtn = document.getElementById('modalSaveBtn');
-  let editingTarget = null;
+  let currentEditingField = null;
 
   const profList = [
     'Радиомеханик узла связи',
@@ -663,44 +780,85 @@
     'ул. Заводская, д. 18'
   ];
 
-  function openEdit(type) {
+  function openEditField(type) {
     if (hasDragged) return;
-    if (localStorage.getItem('istok_data_locked') === 'true') {
-      alert('Данные уже заверены печатью ЖЭК №1.\nВнесение исправлений запрещено протоколом посёлка.\nДля смены обратитесь к диспетчеру.');
+
+    // Индивидуальная проверка блокировки для конкретного поля
+    if (localStorage.getItem(`istok_${type}_locked`) === 'true') {
+      alert('Данная графа уже заверена комендатурой ЖЭК №1.\nСамовольное внесение исправлений запрещено.\nДля смены обратитесь к диспетчеру посёлка.');
       return;
     }
-    editingTarget = type;
-    modalSelect.innerHTML = '';
-    const list = type === 'prof' ? profList : addrList;
-    modalTitle.innerText = type === 'prof' ? 'Регистрация специальности' : 'Регистрация прописки';
 
-    list.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item;
-      opt.innerText = item;
-      modalSelect.appendChild(opt);
-    });
+    currentEditingField = type;
+    modalInputContainer.innerHTML = '';
+
+    if (type === 'name') {
+      modalTitle.innerText = 'Регистрация имени жителя';
+      modalDesc.innerText = 'Укажите подлинное имя гражданина. Изменить его после регистрации будет невозможно.';
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.id = 'modalInputName';
+      inp.placeholder = 'Фамилия Имя или Имя...';
+      inp.value = document.getElementById('pName').innerText !== 'Житель посёлка' ? document.getElementById('pName').innerText : '';
+      modalInputContainer.appendChild(inp);
+    } else {
+      modalTitle.innerText = type === 'prof' ? 'Регистрация специальности' : 'Регистрация прописки';
+      modalDesc.innerText = 'Графа вносится в картотеку посёлка один раз.';
+      const sel = document.createElement('select');
+      sel.id = 'modalSelectField';
+      const list = type === 'prof' ? profList : addrList;
+      list.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.innerText = item;
+        sel.appendChild(opt);
+      });
+      modalInputContainer.appendChild(sel);
+    }
 
     modalBackdrop.style.display = 'flex';
   }
 
-  document.getElementById('pProf').addEventListener('click', () => openEdit('prof'));
-  document.getElementById('pAddress').addEventListener('click', () => openEdit('addr'));
+  document.getElementById('pName').addEventListener('click', () => openEditField('name'));
+  document.getElementById('pProf').addEventListener('click', () => openEditField('prof'));
+  document.getElementById('pAddress').addEventListener('click', () => openEditField('addr'));
 
   modalSaveBtn.addEventListener('click', () => {
-    const val = modalSelect.value;
-    if (editingTarget === 'prof') {
+    if (currentEditingField === 'name') {
+      const val = document.getElementById('modalInputName').value.trim();
+      if (!val || val.length < 2) {
+        alert('Имя должно содержать не менее 2 символов.');
+        return;
+      }
+      if (val.length > 25) {
+        alert('Слишком длинное имя для реестра.');
+        return;
+      }
+      if (isProfane(val)) {
+        alert('ОТКАЗ В РЕГИСТРАЦИИ:\nКомендатура посёлка отклонила указанное имя за нарушение норм общественной морали.\nПожалуйста, укажите подобающее имя жителя.');
+        return;
+      }
+
+      document.getElementById('pName').innerText = val;
+      localStorage.setItem('istok_name', val);
+      localStorage.setItem('istok_name_locked', 'true'); // Блокируем только имя
+    } else if (currentEditingField === 'prof') {
+      const val = document.getElementById('modalSelectField').value;
       document.getElementById('pProf').innerText = val;
       localStorage.setItem('istok_prof', val);
-    } else {
+      localStorage.setItem('istok_prof_locked', 'true'); // Блокируем только профессию
+    } else if (currentEditingField === 'addr') {
+      const val = document.getElementById('modalSelectField').value;
       document.getElementById('pAddress').innerText = val;
       localStorage.setItem('istok_addr', val);
+      localStorage.setItem('istok_addr_locked', 'true'); // Блокируем только прописку
     }
-    localStorage.setItem('istok_data_locked', 'true');
+
     modalBackdrop.style.display = 'none';
     playStampThud();
   });
 
+  // 9. Экспорт в фото
   const exportBtn = document.getElementById('exportBtn');
   exportBtn.addEventListener('click', () => {
     const originalTransform = card.style.transform;
