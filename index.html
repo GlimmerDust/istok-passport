@@ -31,7 +31,6 @@
       user-select: none;
     }
 
-    /* ВНЕШНИЙ КОРПУС КПК (STALKER STYLE) */
     .pda-device {
       width: 360px;
       height: 640px;
@@ -45,7 +44,6 @@
       flex-direction: column;
     }
 
-    /* Рельефные винты по углам */
     .bolt {
       position: absolute;
       width: 8px;
@@ -59,7 +57,6 @@
     .bolt-bl { bottom: 7px; left: 10px; }
     .bolt-br { bottom: 7px; right: 10px; }
 
-    /* Верхняя грань: Индикатор связи и маркировка */
     .pda-top-bezel {
       display: flex;
       justify-content: space-between;
@@ -80,7 +77,6 @@
     }
     @keyframes ledPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-    /* ВНУТРЕННИЙ ДИСПЛЕЙ С ЭФФЕКТОМ SCANLINES */
     .pda-screen {
       flex: 1;
       background: var(--pda-screen-bg);
@@ -101,7 +97,6 @@
       z-index: 90;
     }
 
-    /* СТАТУС-БАР КПК (ЕДИНОЕ ВРЕМЯ UTC+9) */
     .pda-hud {
       background: rgba(16, 26, 20, 0.95);
       border-bottom: 1px solid #233829;
@@ -115,7 +110,6 @@
     }
     .pda-hud-time { color: var(--pda-amber); font-weight: bold; }
 
-    /* ЭКРАНЫ КПК */
     .pda-view {
       flex: 1;
       display: none;
@@ -127,31 +121,30 @@
     }
     .pda-view.active { display: flex; }
 
-    /* ГЛАВНОЕ МЕНЮ: СЕТКА МОДУЛЕЙ СТАЛКЕРА */
     .menu-header {
-      font-size: 12px;
+      font-size: 11px;
       color: #4ade80;
       letter-spacing: 2px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       border-bottom: 1px solid #1a3322;
       padding-bottom: 4px;
     }
     .grid-menu {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 5px;
+      gap: 8px;
+      margin-top: 3px;
     }
     .pda-app-btn {
       background: #0f1612;
       border: 1px solid #233b2a;
       border-radius: 8px;
-      padding: 14px 10px;
+      padding: 10px 6px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.7);
       transition: all 0.15s;
@@ -161,32 +154,41 @@
       border-color: #4ade80;
       transform: scale(0.97);
     }
-    .pda-app-icon { font-size: 24px; }
+    .pda-app-btn.admin-btn {
+      border-color: #b5179e;
+      background: #1f0d1b;
+      grid-column: span 2;
+    }
+    .pda-app-btn.admin-btn:active {
+      background: #33132d;
+      border-color: #f72585;
+    }
+    .pda-app-icon { font-size: 20px; }
     .pda-app-title {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: bold;
       color: #9cb8a3;
       letter-spacing: 1px;
       text-align: center;
     }
+    .admin-btn .pda-app-title { color: #f72585; }
 
-    /* КНОПКА ВОЗВРАТА [◄ МЕНЮ КПК] */
     .btn-back-pda {
       align-self: flex-start;
       background: #101c13;
       color: #72a37d;
       border: 1px solid #233e29;
-      padding: 6px 12px;
-      font-size: 10px;
+      padding: 5px 10px;
+      font-size: 9.5px;
       font-family: inherit;
       border-radius: 4px;
       cursor: pointer;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       font-weight: bold;
     }
     .btn-back-pda:active { background: #1b3320; color: #4ade80; }
 
-    /* ==================== МОДУЛЬ: ПАСПОРТ ==================== */
+    /* ==================== ПАСПОРТ ==================== */
     .passport-box {
       display: flex;
       flex-direction: column;
@@ -281,14 +283,14 @@
     }
     .uv-bottom-code { bottom: 20px; left: 15px; font-size: 8.5px; letter-spacing: 1px; }
 
-    .passport-controls { display: flex; gap: 8px; margin-top: 12px; }
+    .passport-controls { display: flex; gap: 8px; margin-top: 10px; }
     .btn-act {
-      background: #152219; color: #8cb896; border: 1px solid #284430; padding: 6px 14px;
-      font-family: inherit; font-size: 11px; border-radius: 4px; cursor: pointer;
+      background: #152219; color: #8cb896; border: 1px solid #284430; padding: 6px 12px;
+      font-family: inherit; font-size: 10.5px; border-radius: 4px; cursor: pointer;
     }
     .btn-act:active { background: #1f3825; color: #4ade80; }
 
-    /* ==================== МОДУЛЬ: РАДИО ==================== */
+    /* ==================== РАДИО ==================== */
     .radio-unit {
       background: #14110f; border: 2px solid #2d2420; border-radius: 12px;
       padding: 12px; margin-top: 5px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
@@ -319,21 +321,76 @@
     .knob { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #3a2e26 0%, #161210 80%); border: 2px solid #4a3c33; position: relative; cursor: ew-resize; }
     .knob-marker { position: absolute; top: 5px; left: calc(50% - 2px); width: 4px; height: 12px; background: #d4a373; }
 
-    /* ЗАГЛУШКИ ДЛЯ ОСТАЛЬНЫХ МОДУЛЕЙ */
     .stub-terminal {
       flex: 1; border: 1px dashed #233b2a; border-radius: 8px; padding: 15px;
       display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
       color: #62876b; font-size: 11px; line-height: 1.6;
     }
 
-    /* МОДАЛЬНОЕ ОКНО */
+    /* ==================== ПУЛЬТ КОМЕНДАНТА ==================== */
+    .admin-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      color: #e0aaff;
+      font-size: 11px;
+    }
+    .admin-card {
+      background: #190918;
+      border: 1px solid #7209b7;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    }
+    .admin-card h4 {
+      margin: 0 0 8px 0;
+      color: #f72585;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+    .admin-btn-action {
+      background: #480ca8;
+      color: #fff;
+      border: 1px solid #7209b7;
+      padding: 8px;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 5px;
+    }
+    .admin-btn-action:active { background: #560bad; }
+    .token-box {
+      background: #0d040c;
+      border: 1px dashed #f72585;
+      color: #4cc9f0;
+      padding: 8px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin-top: 6px;
+    }
+
+    /* МОДАЛКА */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
       align-items: center; justify-content: center; z-index: 100; padding: 20px;
     }
     .modal-box { background: #e6e0d2; border: 2px solid #333; padding: 18px; width: 100%; max-width: 290px; border-radius: 8px; font-size: 11px; color: #222; }
-    .modal-box input, .modal-box select { width: 100%; padding: 8px; margin: 8px 0 12px 0; font-family: inherit; border: 1px solid #444; background: #f7f5ef; font-size: 11px; }
+    .modal-box input, .modal-box select { width: 100%; padding: 8px; margin: 8px 0 10px 0; font-family: inherit; border: 1px solid #444; background: #f7f5ef; font-size: 11px; }
     .modal-box button { width: 100%; padding: 8px; background: #2b3a67; color: #fff; border: none; cursor: pointer; font-family: inherit; font-weight: bold; }
+    .unlock-link {
+      font-size: 9.5px;
+      color: #2b3a67;
+      text-decoration: underline;
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 8px;
+    }
 
     .bureau-overlay {
       position: absolute; inset: 0; background: rgba(8, 8, 12, 0.96); color: #ff3838; padding: 18px;
@@ -351,7 +408,6 @@
   <div class="bolt bolt-bl"></div>
   <div class="bolt bolt-br"></div>
 
-  <!-- Верхняя металлическая планка КПК -->
   <div class="pda-top-bezel">
     <span>КПК «ИСТОК-М»</span>
     <div style="display: flex; align-items: center; gap: 6px;">
@@ -360,17 +416,15 @@
     </div>
   </div>
 
-  <!-- Внутренний дисплей -->
   <div class="pda-screen">
     
-    <!-- СТАТУС-БАР: ЕДИНОЕ ВРЕМЯ UTC+9 ДЛЯ ВСЕХ -->
     <div class="pda-hud">
-      <span id="hudCallsign">ОЛЬКА • ИСТ-92</span>
+      <span id="hudCallsign">ЖИТЕЛЬ • ИСТ-79</span>
       <span class="pda-hud-time" id="hudClock">12:00 [ИСТОК]</span>
       <span>МАЧТА-4: 86%</span>
     </div>
 
-    <!-- 1. ГЛАВНЫЙ ЭКРАН КПК (МЕНЮ ПРИЛОЖЕНИЙ) -->
+    <!-- МЕНЮ КПК -->
     <div class="pda-view active" id="viewMenu">
       <div class="menu-header">СИСТЕМА ВЫЧИСЛЕНИЙ • ГЛАВНЫЙ УЗЕЛ</div>
       <div class="grid-menu">
@@ -390,7 +444,7 @@
           <div class="pda-app-title">КАРТА СЕКТОРА</div>
         </div>
 
-        <div class="pda-app-btn" onclick="openStub('ДИСПЕТЧЕР ЖЭК', 'Журнал обращений ЖЭК №1. Приём жалоб на перебои электросети и посторонние шумы в коммуникациях. Дежурный диспетчер на смене.')">
+        <div class="pda-app-btn" onclick="openStub('ДИСПЕТЧЕР ЖЭК', 'Журнал обращений ЖЭК №1. Приём жалоб на перебои электросети и посторонние шумы в коммуникациях.')">
           <div class="pda-app-icon">🏢</div>
           <div class="pda-app-title">ДИСПЕТЧЕР ЖЭК</div>
         </div>
@@ -400,15 +454,21 @@
           <div class="pda-app-title">СНАРЯЖЕНИЕ</div>
         </div>
 
-        <div class="pda-app-btn" onclick="openStub('ДЕПЕШИ ГО/ЧС', 'Архив сводок комендатуры. Экстренные оповещения по посёлку: Пломба №4 удерживает контур. Покидать жилой сектор после 23:00 запрещено.')">
+        <div class="pda-app-btn" onclick="openStub('ДЕПЕШИ ГО/ЧС', 'Архив сводок комендатуры. Пломба №4 удерживает контур. Покидать жилой сектор после 23:00 запрещено.')">
           <div class="pda-app-icon">📟</div>
           <div class="pda-app-title">ДЕПЕШИ ГО/ЧС</div>
+        </div>
+
+        <!-- 7. ПУЛЬТ КОМЕНДАНТА (ТОЛЬКО ДЛЯ АДМИНИСТРАТОРА) -->
+        <div class="pda-app-btn admin-btn" id="adminAppBtn" style="display: none;">
+          <div class="pda-app-icon">⚡</div>
+          <div class="pda-app-title">ПУЛЬТ КОМЕНДАНТА [ДОПУСК-1]</div>
         </div>
 
       </div>
     </div>
 
-    <!-- 2. МОДУЛЬ: УДОСТОВЕРЕНИЕ -->
+    <!-- УДОСТОВЕРЕНИЕ -->
     <div class="pda-view" id="viewPassport">
       <button class="btn-back-pda" id="backFromPassport">◄ МЕНЮ КПК</button>
       
@@ -420,7 +480,6 @@
             <div class="card-edge-top"></div>
             <div class="card-edge-bottom"></div>
 
-            <!-- Лицо бланка -->
             <div class="card-face card-front" id="passportFront">
               <div class="glare"></div>
               <div class="hologram-strip"></div>
@@ -470,7 +529,6 @@
               </div>
             </div>
 
-            <!-- Кожаный задник -->
             <div class="card-face card-back" id="passportBack">
               <div class="leather-stitch"></div>
               <div class="leather-title">ПАСПОРТ</div>
@@ -488,7 +546,7 @@
       </div>
     </div>
 
-    <!-- 3. МОДУЛЬ: РАДИОСКАНЕР -->
+    <!-- РАДИОСКАНЕР -->
     <div class="pda-view" id="viewRadio">
       <button class="btn-back-pda" id="backFromRadio">◄ МЕНЮ КПК</button>
       
@@ -520,13 +578,34 @@
       </div>
     </div>
 
-    <!-- 4. ЗАГЛУШКА ДЛЯ ОСТАЛЬНЫХ МОДУЛЕЙ -->
+    <!-- ЗАГЛУШКА ДРУГИХ МОДУЛЕЙ -->
     <div class="pda-view" id="viewStub">
       <button class="btn-back-pda" id="backFromStub">◄ МЕНЮ КПК</button>
       <div class="stub-terminal">
         <h3 id="stubTitle" style="color: #4ade80; margin-top: 0;">МОДУЛЬ</h3>
         <p id="stubContent">Текст депеши...</p>
         <span style="font-size: 8px; opacity: 0.5;">ПРОТОКОЛ БЕЗОПАСНОСТИ РАЙОНА • КОМЕНДАТУРА</span>
+      </div>
+    </div>
+
+    <!-- ПУЛЬТ КОМЕНДАНТА (VIEW) -->
+    <div class="pda-view" id="viewAdmin">
+      <button class="btn-back-pda" id="backFromAdmin">◄ МЕНЮ КПК</button>
+      <div class="menu-header" style="color: #f72585;">УПРАВЛЕНИЕ ПОСЁЛКОМ • ДОПУСК-1</div>
+      
+      <div class="admin-panel">
+        <div class="admin-card">
+          <h4>ЛИЧНЫЙ ДОПУСК КОМЕНДАНТА</h4>
+          <div>Статус: <strong style="color: #4cc9f0;">ПОЛНЫЙ ДОСТУП</strong></div>
+          <button class="admin-btn-action" id="adminResetSelfBtn">Снять все свои блокировки (Редактировать всё)</button>
+        </div>
+
+        <div class="admin-card">
+          <h4>ВЫДАЧА ПРЕДПИСАНИЯ ДЛЯ ЖИТЕЛЕЙ</h4>
+          <div style="font-size: 9.5px; opacity: 0.8;">Сгенерируйте код для игрока, чтобы он мог повторно переоформить паспорт:</div>
+          <button class="admin-btn-action" id="genTokenBtn">Сгенерировать код разблокировки</button>
+          <div class="token-box" id="tokenDisplay">---</div>
+        </div>
       </div>
     </div>
 
@@ -542,11 +621,15 @@
     <p style="font-size: 10px; color: #555; margin: 6px 0;" id="modalDesc">Данные заверяются печатью ЖЭК один раз.</p>
     <div id="modalInputContainer"></div>
     <button id="modalSaveBtn">Заверить данные в ЖЭК</button>
+    
+    <div style="text-align: center;">
+      <span class="unlock-link" id="enterCodeLink">Есть служебный код разблокировки?</span>
+    </div>
   </div>
 </div>
 
 <script>
-  // 1. АУДИО ДВИЖОК: СТАЛКЕРСКИЙ КЛИК КПК
+  // 1. АУДИО
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -603,11 +686,36 @@
     }
   }
 
-  // 2. ЕДИНОЕ ПОСЕЛКОВОЕ ВРЕМЯ (UTC+9)
+  // 2. ОБЛАЧНОЕ ХРАНИЛИЩЕ ТЕЛЕГРАМ ДЛЯ СИНХРОНИЗАЦИИ (НОУТ + ТЕЛЕФОН)
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
+
+  async function syncSet(key, value) {
+    localStorage.setItem(key, value);
+    if (tg?.CloudStorage) {
+      try { tg.CloudStorage.setItem(key, value); } catch(e){}
+    }
+  }
+
+  function syncGet(key, callback) {
+    if (tg?.CloudStorage) {
+      tg.CloudStorage.getItem(key, (err, val) => {
+        if (!err && val) callback(val);
+        else callback(localStorage.getItem(key));
+      });
+    } else {
+      callback(localStorage.getItem(key));
+    }
+  }
+
+  // 3. ЧАСЫ ИСТОКА (UTC+9)
   function updateIstokClock() {
     const now = new Date();
     const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const istokTime = new Date(utcTime + (3600000 * 9)); // Смещение UTC+9
+    const istokTime = new Date(utcTime + (3600000 * 9));
     const hours = String(istokTime.getHours()).padStart(2, '0');
     const mins = String(istokTime.getMinutes()).padStart(2, '0');
     document.getElementById('hudClock').innerText = `${hours}:${mins} [ИСТОК]`;
@@ -615,23 +723,26 @@
   setInterval(updateIstokClock, 1000);
   updateIstokClock();
 
-  // 3. ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ КПК
+  // 4. НАВИГАЦИЯ КПК
   const viewMenu = document.getElementById('viewMenu');
   const viewPassport = document.getElementById('viewPassport');
   const viewRadio = document.getElementById('viewRadio');
   const viewStub = document.getElementById('viewStub');
+  const viewAdmin = document.getElementById('viewAdmin');
 
   function showView(view) {
     playPdaBeep();
-    [viewMenu, viewPassport, viewRadio, viewStub].forEach(v => v.classList.remove('active'));
+    [viewMenu, viewPassport, viewRadio, viewStub, viewAdmin].forEach(v => v.classList.remove('active'));
     view.classList.add('active');
   }
 
   document.getElementById('openPassportApp').addEventListener('click', () => showView(viewPassport));
   document.getElementById('openRadioApp').addEventListener('click', () => showView(viewRadio));
+  document.getElementById('adminAppBtn').addEventListener('click', () => showView(viewAdmin));
   document.getElementById('backFromPassport').addEventListener('click', () => showView(viewMenu));
   document.getElementById('backFromRadio').addEventListener('click', () => showView(viewMenu));
   document.getElementById('backFromStub').addEventListener('click', () => showView(viewMenu));
+  document.getElementById('backFromAdmin').addEventListener('click', () => showView(viewMenu));
 
   window.openStub = function(title, text) {
     document.getElementById('stubTitle').innerText = title;
@@ -639,37 +750,46 @@
     showView(viewStub);
   };
 
-  // 4. ДАННЫЕ ЖИТЕЛЯ И ТГ
-  let tgUser = null;
-  if (window.Telegram && window.Telegram.WebApp) {
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    tgUser = tg.initDataUnsafe?.user;
-  }
-
+  // 5. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И АДМИНКА
+  const tgUser = tg?.initDataUnsafe?.user;
   const rawId = tgUser?.id || (localStorage.getItem('istok_mock_id') || Math.floor(100000 + Math.random() * 900000));
   if (!tgUser) localStorage.setItem('istok_mock_id', rawId);
 
   const calculatedSeries = 'ИСТ-' + ((Math.abs(Number(rawId)) % 80) + 15);
-  const calculatedNumber = String(Math.abs(Number(rawId)) % 1000000).padStart(6, '0');
+  let calculatedNumber = String(Math.abs(Number(rawId)) % 1000000).padStart(6, '0');
+
+  // СПИСОК АДМИНИСТРАТОРОВ ПОСЁЛКА (Твой номер 501517)
+  const ADMIN_NUMBERS = ['501517'];
+  const isAdmin = ADMIN_NUMBERS.includes(calculatedNumber) || (tgUser?.username === 'glimmerdust19');
+
+  if (isAdmin) {
+    document.getElementById('adminAppBtn').style.display = 'flex';
+  }
+
   document.getElementById('pSeries').innerText = calculatedSeries;
   document.getElementById('pNumber').innerText = calculatedNumber;
 
-  const savedName = localStorage.getItem('istok_name');
-  const initialName = savedName || (tgUser ? tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '') : 'Житель посёлка');
-  document.getElementById('pName').innerText = initialName;
-  document.getElementById('hudCallsign').innerText = `${initialName.toUpperCase()} • ${calculatedSeries}`;
+  // Синхронизированная загрузка из CloudStorage
+  syncGet('istok_name', (val) => {
+    const name = val || (tgUser ? tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '') : 'Житель посёлка');
+    document.getElementById('pName').innerText = name;
+    document.getElementById('hudCallsign').innerText = `${name.toUpperCase()} • ${calculatedSeries}`;
+  });
 
-  const savedProf = localStorage.getItem('istok_prof');
-  const savedAddr = localStorage.getItem('istok_addr');
-  if (savedProf) document.getElementById('pProf').innerText = savedProf;
-  if (savedAddr) document.getElementById('pAddress').innerText = savedAddr;
+  syncGet('istok_prof', (val) => { if (val) document.getElementById('pProf').innerText = val; });
+  syncGet('istok_addr', (val) => { if (val) document.getElementById('pAddress').innerText = val; });
+  syncGet('istok_avatar', (val) => {
+    if (val) {
+      const userPhoto = document.getElementById('userPhoto');
+      userPhoto.src = val;
+      userPhoto.style.display = 'block';
+      document.getElementById('photoPlaceholder').style.display = 'none';
+    }
+  });
 
-  // 5. 3D ПАСПОРТ: СВОБОДНОЕ ВРАЩЕНИЕ
+  // 6. 3D ПАСПОРТ
   const card = document.getElementById('card');
-  let isDragging = false;
-  let startX = 0, startY = 0;
+  let isDragging = false, startX = 0, startY = 0;
   let currentRotY = -7, currentRotX = 4;
   let prevRotY = -7, prevRotX = 4;
   let hasDragged = false;
@@ -706,18 +826,11 @@
   window.addEventListener('pointerup', () => { isDragging = false; });
   window.addEventListener('pointercancel', () => { isDragging = false; });
 
-  // 6. ФОТО ЖИТЕЛЯ
+  // 7. ФОТО
   const photoTrigger = document.getElementById('photoTrigger');
   const fileInput = document.getElementById('fileInput');
   const userPhoto = document.getElementById('userPhoto');
   const photoPlaceholder = document.getElementById('photoPlaceholder');
-
-  const savedPhoto = localStorage.getItem('istok_avatar');
-  if (savedPhoto) {
-    userPhoto.src = savedPhoto;
-    userPhoto.style.display = 'block';
-    photoPlaceholder.style.display = 'none';
-  }
 
   photoTrigger.addEventListener('click', () => { if (!hasDragged) fileInput.click(); });
 
@@ -736,7 +849,7 @@
         userPhoto.src = dataUrl;
         userPhoto.style.display = 'block';
         photoPlaceholder.style.display = 'none';
-        localStorage.setItem('istok_avatar', dataUrl);
+        syncSet('istok_avatar', dataUrl);
         playStampThud();
       };
       img.src = event.target.result;
@@ -744,7 +857,7 @@
     reader.readAsDataURL(file);
   });
 
-  // 7. УФ И ПЕЧАТЬ
+  // 8. УФ И ПЕЧАТЬ
   const headerTitle = document.getElementById('headerTitle');
   const sceneContainer = document.getElementById('sceneContainer');
   let headerClicks = 0, headerClickTimer = null;
@@ -780,28 +893,54 @@
   seal.addEventListener('pointerleave', clearHold);
   secretLayer.addEventListener('dblclick', () => { secretLayer.style.display = 'none'; });
 
-  // 8. АНТИМАТ ФИЛЬТР
-  function isProfane(text) {
-    if (!text || text.trim().length === 0) return true;
-    let s = text.toLowerCase();
+  // 9. СТРОГИЙ АНТИМАТ С РАСПОЗНАВАНИЕМ МАСКИРОВОК (С*КА, П*ЗДА, И Т.Д.)
+  function isProfane(raw) {
+    if (!raw || raw.trim().length === 0) return true;
+    let s = raw.toLowerCase().trim();
+
+    // Замена символов маскировки (*, @, _, -, .) на гласную «у» или «е», чтобы ловить маски
+    const maskedS = s.replace(/[\*_~#\-\.\$]/g, 'у');
+
     const leetMap = {
-      '4': 'ч', '0': 'о', '1': 'и', '3': 'з', '6': 'б', '@': 'а', '$': 'с',
+      '4': 'ч', '0': 'о', '1': 'и', '3': 'з', '6': 'б', '@': 'а',
       'y': 'у', 'u': 'у', 'k': 'к', 'p': 'р', 'c': 'с', 'x': 'х', 'e': 'е',
-      'a': 'а', 'o': 'о', 'b': 'б', 't': 'т', 'h': 'х', 'v': 'в', 'w': 'в'
+      'a': 'а', 'o': 'о', 'b': 'б', 't': 'т', 'h': 'х'
     };
-    s = s.split('').map(ch => leetMap[ch] || ch).join('');
-    s = s.replace(/[^а-яa-z]/g, '');
-    s = s.replace(/(.)\1+/g, '$1');
+
+    function normalize(str) {
+      let res = str.split('').map(ch => leetMap[ch] || ch).join('');
+      res = res.replace(/[^а-яa-z]/g, '');
+      res = res.replace(/(.)\1+/g, '$1');
+      return res;
+    }
+
+    const normOriginal = normalize(s);
+    const normMasked = normalize(maskedS);
+
     const badPatterns = [
-      /ху[йиеяюеё]/, /п[иеё]зд/, /[её]б[аеиоул]/, /бл[яе]/, /м[уy]д[аa][кkч]/,
-      /г[аa]нд[оo]н/, /с[уy][чч4][кkаa]/, /с[уy][кk][аa]/, /чм[оo]/, /з[аa]л[уy]п/,
-      /г[оo]вн/, /д[еe]рьм/, /др[оo]ч/, /шл[юy]х/, /п[ие]д[оa]р/, /х[еe]р/, /тв[аa]рь/,
-      /fuck/, /bitch/, /shit/, /cunt/, /dick/, /asshole/, /whore/, /bastard/, /pussy/, /cock/, /fag/
+      /ху[йиеяюеё]/,
+      /п[иеё]зд/,
+      /[её]б[аеиоул]/,
+      /бл[яе]/,
+      /м[уy]д[аa][кkч]/,
+      /г[аa]нд[оo]н/,
+      /с[уy][чч4][кkаa]/,
+      /с[уy][кk][аa]/,
+      /с[кk][аa]/, // Ловит «ска» после среза звездочки
+      /чм[оo]/,
+      /з[аa]л[уy]п/,
+      /г[оo]вн/,
+      /д[еe]рьм/,
+      /шл[юy]х/,
+      /п[ие]д[оa]р/,
+      /х[еe]р/,
+      /fuck/, /bitch/, /shit/, /cunt/, /dick/, /asshole/, /whore/
     ];
-    return badPatterns.some(rx => rx.test(s));
+
+    return badPatterns.some(rx => rx.test(normOriginal) || rx.test(normMasked));
   }
 
-  // 9. МОДАЛКА
+  // 10. МОДАЛКА И РЕДАКТИРОВАНИЕ
   const modalBackdrop = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
   const modalDesc = document.getElementById('modalDesc');
@@ -821,34 +960,38 @@
 
   function openEditField(type) {
     if (hasDragged) return;
-    if (localStorage.getItem(`istok_${type}_locked`) === 'true') {
-      alert('Данная графа уже заверена комендатурой ЖЭК №1.\nСамовольное внесение исправлений запрещено.\nДля смены обратитесь к диспетчеру посёлка.');
-      return;
-    }
-    currentEditingField = type;
-    modalInputContainer.innerHTML = '';
 
-    if (type === 'name') {
-      modalTitle.innerText = 'Регистрация имени жителя';
-      modalDesc.innerText = 'Укажите подлинное имя гражданина. Изменить его после регистрации будет невозможно.';
-      const inp = document.createElement('input');
-      inp.type = 'text'; inp.id = 'modalInputName'; inp.placeholder = 'Фамилия Имя или Имя...';
-      inp.value = document.getElementById('pName').innerText !== 'Житель посёлка' ? document.getElementById('pName').innerText : '';
-      modalInputContainer.appendChild(inp);
-    } else {
-      modalTitle.innerText = type === 'prof' ? 'Регистрация специальности' : 'Регистрация прописки';
-      modalDesc.innerText = 'Графа вносится в картотеку посёлка один раз.';
-      const sel = document.createElement('select');
-      sel.id = 'modalSelectField';
-      const list = type === 'prof' ? profList : addrList;
-      list.forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item; opt.innerText = item;
-        sel.appendChild(opt);
-      });
-      modalInputContainer.appendChild(sel);
-    }
-    modalBackdrop.style.display = 'flex';
+    syncGet(`istok_${type}_locked`, (locked) => {
+      if (locked === 'true' && !isAdmin) {
+        alert('Данная графа заверена печатью ЖЭК №1.\nСамовольное внесение изменений запрещено.\nОбратитесь к диспетчеру за служебным кодом.');
+        return;
+      }
+
+      currentEditingField = type;
+      modalInputContainer.innerHTML = '';
+
+      if (type === 'name') {
+        modalTitle.innerText = 'Регистрация имени жителя';
+        modalDesc.innerText = 'Укажите настоящее имя или позывной. Изменить после регистрации нельзя без разрешения ЖЭК.';
+        const inp = document.createElement('input');
+        inp.type = 'text'; inp.id = 'modalInputName'; inp.placeholder = 'Имя жителя...';
+        inp.value = document.getElementById('pName').innerText !== 'Житель посёлка' ? document.getElementById('pName').innerText : '';
+        modalInputContainer.appendChild(inp);
+      } else {
+        modalTitle.innerText = type === 'prof' ? 'Регистрация специальности' : 'Регистрация прописки';
+        modalDesc.innerText = 'Графа заверяется печатью ЖЭК №1.';
+        const sel = document.createElement('select');
+        sel.id = 'modalSelectField';
+        const list = type === 'prof' ? profList : addrList;
+        list.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item; opt.innerText = item;
+          sel.appendChild(opt);
+        });
+        modalInputContainer.appendChild(sel);
+      }
+      modalBackdrop.style.display = 'flex';
+    });
   }
 
   document.getElementById('pName').addEventListener('click', () => openEditField('name'));
@@ -859,31 +1002,65 @@
     if (currentEditingField === 'name') {
       const val = document.getElementById('modalInputName').value.trim();
       if (!val || val.length < 2) { alert('Имя должно содержать не менее 2 символов.'); return; }
-      if (val.length > 25) { alert('Слишком длинное имя для реестра.'); return; }
+      if (val.length > 25) { alert('Слишком длинное имя.'); return; }
       if (isProfane(val)) {
         alert('ОТКАЗ В РЕГИСТРАЦИИ:\nКомендатура посёлка отклонила указанное имя за нарушение норм общественной морали.');
         return;
       }
       document.getElementById('pName').innerText = val;
       document.getElementById('hudCallsign').innerText = `${val.toUpperCase()} • ${calculatedSeries}`;
-      localStorage.setItem('istok_name', val);
-      localStorage.setItem('istok_name_locked', 'true');
+      syncSet('istok_name', val);
+      if (!isAdmin) syncSet('istok_name_locked', 'true');
     } else if (currentEditingField === 'prof') {
       const val = document.getElementById('modalSelectField').value;
       document.getElementById('pProf').innerText = val;
-      localStorage.setItem('istok_prof', val);
-      localStorage.setItem('istok_prof_locked', 'true');
+      syncSet('istok_prof', val);
+      if (!isAdmin) syncSet('istok_prof_locked', 'true');
     } else if (currentEditingField === 'addr') {
       const val = document.getElementById('modalSelectField').value;
       document.getElementById('pAddress').innerText = val;
-      localStorage.setItem('istok_addr', val);
-      localStorage.setItem('istok_addr_locked', 'true');
+      syncSet('istok_addr', val);
+      if (!isAdmin) syncSet('istok_addr_locked', 'true');
     }
+
     modalBackdrop.style.display = 'none';
     playStampThud();
   });
 
-  // 10. ЭКСПОРТ В ФОТО
+  // ВВОД КОДА РАЗБЛОКИРОВКИ ОТ АДМИНИСТРАТОРА
+  document.getElementById('enterCodeLink').addEventListener('click', () => {
+    const code = prompt('Введите служебный код предписания ЖЭК:');
+    if (!code) return;
+    const cleanCode = code.trim().toUpperCase();
+    if (cleanCode.startsWith('ИСТОК-') || cleanCode === 'СМУТА-84' || cleanCode === 'ЖЭК-ДОПУСК') {
+      syncSet('istok_name_locked', 'false');
+      syncSet('istok_prof_locked', 'false');
+      syncSet('istok_addr_locked', 'false');
+      alert('СЛУЖЕБНОЕ ПРЕДПИСАНИЕ ПРИНЯТО:\nПечать снята. Все графы открыты для повторного заполнения.');
+      modalBackdrop.style.display = 'none';
+      playStampThud();
+    } else {
+      alert('ОШИБКА: Недействительный или просроченный код предписания.');
+    }
+  });
+
+  // 11. ФУНКЦИИ ПУЛЬТА КОМЕНДАНТА (ДЛЯ НОМЕРА 501517)
+  document.getElementById('adminResetSelfBtn').addEventListener('click', () => {
+    syncSet('istok_name_locked', 'false');
+    syncSet('istok_prof_locked', 'false');
+    syncSet('istok_addr_locked', 'false');
+    alert('ПОЛНЫЙ ДОСТУП: Все блокировки с вашего КПК сняты. Вы можете нажимать на имя, профессию и адрес для свободной смены.');
+    playStampThud();
+  });
+
+  document.getElementById('genTokenBtn').addEventListener('click', () => {
+    const randomCode = 'ИСТОК-' + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('tokenDisplay').innerText = randomCode;
+    playStampThud();
+    alert(`Код предписания сформирован: ${randomCode}\nОтправьте его игроку. Он нажмёт «Есть служебный код?» при редактировании и разблокирует свой профиль.`);
+  });
+
+  // 12. ЭКСПОРТ В ФОТО
   const exportBtn = document.getElementById('exportBtn');
   exportBtn.addEventListener('click', () => {
     const originalTransform = card.style.transform;
@@ -901,7 +1078,7 @@
     });
   });
 
-  // 11. РАДИОПРИЁМНИК
+  // 13. РАДИОСКАНЕР
   let isRadioOn = false;
   let currentFreq = 64.0;
   const minFreq = 64.0, maxFreq = 108.0;
