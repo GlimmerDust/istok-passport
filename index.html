@@ -402,6 +402,9 @@
 </head>
 <body>
 
+<!-- АУДИОФАЙЛ ДЕПЕШИ ДИСПЕТЧЕРА -->
+<audio id="radioVoice" src="./welcome.mp3" loop preload="auto" crossorigin="anonymous"></audio>
+
 <div class="pda-device">
   <div class="bolt bolt-tl"></div>
   <div class="bolt bolt-tr"></div>
@@ -459,7 +462,7 @@
           <div class="pda-app-title">ДЕПЕШИ ГО/ЧС</div>
         </div>
 
-        <!-- 7. ПУЛЬТ КОМЕНДАНТА (ТОЛЬКО ДЛЯ АДМИНИСТРАТОРА) -->
+        <!-- ПУЛЬТ КОМЕНДАНТА (ДЛЯ НОМЕРА 501517) -->
         <div class="pda-app-btn admin-btn" id="adminAppBtn" style="display: none;">
           <div class="pda-app-icon">⚡</div>
           <div class="pda-app-title">ПУЛЬТ КОМЕНДАНТА [ДОПУСК-1]</div>
@@ -588,7 +591,7 @@
       </div>
     </div>
 
-    <!-- ПУЛЬТ КОМЕНДАНТА (VIEW) -->
+    <!-- ПУЛЬТ КОМЕНДАНТА -->
     <div class="pda-view" id="viewAdmin">
       <button class="btn-back-pda" id="backFromAdmin">◄ МЕНЮ КПК</button>
       <div class="menu-header" style="color: #f72585;">УПРАВЛЕНИЕ ПОСЁЛКОМ • ДОПУСК-1</div>
@@ -686,7 +689,7 @@
     }
   }
 
-  // 2. ОБЛАЧНОЕ ХРАНИЛИЩЕ ТЕЛЕГРАМ ДЛЯ СИНХРОНИЗАЦИИ (НОУТ + ТЕЛЕФОН)
+  // 2. ОБЛАЧНОЕ ХРАНИЛИЩЕ
   const tg = window.Telegram?.WebApp;
   if (tg) {
     tg.ready();
@@ -750,7 +753,7 @@
     showView(viewStub);
   };
 
-  // 5. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И АДМИНКА
+  // 5. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ
   const tgUser = tg?.initDataUnsafe?.user;
   const rawId = tgUser?.id || (localStorage.getItem('istok_mock_id') || Math.floor(100000 + Math.random() * 900000));
   if (!tgUser) localStorage.setItem('istok_mock_id', rawId);
@@ -758,7 +761,6 @@
   const calculatedSeries = 'ИСТ-' + ((Math.abs(Number(rawId)) % 80) + 15);
   let calculatedNumber = String(Math.abs(Number(rawId)) % 1000000).padStart(6, '0');
 
-  // СПИСОК АДМИНИСТРАТОРОВ ПОСЁЛКА (Твой номер 501517)
   const ADMIN_NUMBERS = ['501517'];
   const isAdmin = ADMIN_NUMBERS.includes(calculatedNumber) || (tgUser?.username === 'glimmerdust19');
 
@@ -769,7 +771,6 @@
   document.getElementById('pSeries').innerText = calculatedSeries;
   document.getElementById('pNumber').innerText = calculatedNumber;
 
-  // Синхронизированная загрузка из CloudStorage
   syncGet('istok_name', (val) => {
     const name = val || (tgUser ? tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '') : 'Житель посёлка');
     document.getElementById('pName').innerText = name;
@@ -893,12 +894,10 @@
   seal.addEventListener('pointerleave', clearHold);
   secretLayer.addEventListener('dblclick', () => { secretLayer.style.display = 'none'; });
 
-  // 9. СТРОГИЙ АНТИМАТ С РАСПОЗНАВАНИЕМ МАСКИРОВОК (С*КА, П*ЗДА, И Т.Д.)
+  // 9. АНТИМАТ
   function isProfane(raw) {
     if (!raw || raw.trim().length === 0) return true;
     let s = raw.toLowerCase().trim();
-
-    // Замена символов маскировки (*, @, _, -, .) на гласную «у» или «е», чтобы ловить маски
     const maskedS = s.replace(/[\*_~#\-\.\$]/g, 'у');
 
     const leetMap = {
@@ -918,29 +917,16 @@
     const normMasked = normalize(maskedS);
 
     const badPatterns = [
-      /ху[йиеяюеё]/,
-      /п[иеё]зд/,
-      /[её]б[аеиоул]/,
-      /бл[яе]/,
-      /м[уy]д[аa][кkч]/,
-      /г[аa]нд[оo]н/,
-      /с[уy][чч4][кkаa]/,
-      /с[уy][кk][аa]/,
-      /с[кk][аa]/, // Ловит «ска» после среза звездочки
-      /чм[оo]/,
-      /з[аa]л[уy]п/,
-      /г[оo]вн/,
-      /д[еe]рьм/,
-      /шл[юy]х/,
-      /п[ие]д[оa]р/,
-      /х[еe]р/,
+      /ху[йиеяюеё]/, /п[иеё]зд/, /[её]б[аеиоул]/, /бл[яе]/, /м[уy]д[аa][кkч]/,
+      /г[аa]нд[оo]н/, /с[уy][чч4][кkаa]/, /с[уy][кk][аa]/, /с[кk][аa]/,
+      /чм[оo]/, /з[аa]л[уy]п/, /г[оo]вн/, /д[еe]рьм/, /шл[юy]х/, /п[ие]д[оa]р/, /х[еe]р/,
       /fuck/, /bitch/, /shit/, /cunt/, /dick/, /asshole/, /whore/
     ];
 
     return badPatterns.some(rx => rx.test(normOriginal) || rx.test(normMasked));
   }
 
-  // 10. МОДАЛКА И РЕДАКТИРОВАНИЕ
+  // 10. МОДАЛКА
   const modalBackdrop = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
   const modalDesc = document.getElementById('modalDesc');
@@ -1027,7 +1013,6 @@
     playStampThud();
   });
 
-  // ВВОД КОДА РАЗБЛОКИРОВКИ ОТ АДМИНИСТРАТОРА
   document.getElementById('enterCodeLink').addEventListener('click', () => {
     const code = prompt('Введите служебный код предписания ЖЭК:');
     if (!code) return;
@@ -1044,7 +1029,7 @@
     }
   });
 
-  // 11. ФУНКЦИИ ПУЛЬТА КОМЕНДАНТА (ДЛЯ НОМЕРА 501517)
+  // 11. АДМИНКА
   document.getElementById('adminResetSelfBtn').addEventListener('click', () => {
     syncSet('istok_name_locked', 'false');
     syncSet('istok_prof_locked', 'false');
@@ -1060,7 +1045,7 @@
     alert(`Код предписания сформирован: ${randomCode}\nОтправьте его игроку. Он нажмёт «Есть служебный код?» при редактировании и разблокирует свой профиль.`);
   });
 
-  // 12. ЭКСПОРТ В ФОТО
+  // 12. ЭКСПОРТ
   const exportBtn = document.getElementById('exportBtn');
   exportBtn.addEventListener('click', () => {
     const originalTransform = card.style.transform;
@@ -1078,7 +1063,7 @@
     });
   });
 
-  // 13. РАДИОСКАНЕР
+  // 13. РАДИОСКАНЕР С ГОЛОСОМ ДИСПЕТЧЕРА (WELCOME.MP3)
   let isRadioOn = false;
   let currentFreq = 64.0;
   const minFreq = 64.0, maxFreq = 108.0;
@@ -1091,9 +1076,13 @@
   const tuningKnob = document.getElementById('tuningKnob');
 
   let noiseNode = null, noiseGain = null, stationGain = null, stationOsc1 = null, stationOsc2 = null, heterodyneWhistle = null, heterodyneGain = null;
+  let voiceAudio = null, voiceSource = null, voiceFilter = null, voiceGain = null;
+  let isVoiceInitialized = false;
 
   function initRadioAudio() {
     const ctx = getAudioContext();
+    
+    // Статический шум эфира
     const bufferSize = ctx.sampleRate * 2;
     const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
@@ -1114,6 +1103,7 @@
     noiseGain.connect(ctx.destination);
     noiseNode.start();
 
+    // Свист подстройки верньера
     heterodyneWhistle = ctx.createOscillator();
     heterodyneGain = ctx.createGain();
     heterodyneWhistle.frequency.setValueAtTime(1000, ctx.currentTime);
@@ -1122,6 +1112,7 @@
     heterodyneGain.connect(ctx.destination);
     heterodyneWhistle.start();
 
+    // Генераторы для других станций
     stationOsc1 = ctx.createOscillator();
     stationOsc2 = ctx.createOscillator();
     stationGain = ctx.createGain();
@@ -1131,13 +1122,39 @@
     stationGain.connect(ctx.destination);
     stationOsc1.start();
     stationOsc2.start();
+
+    // ПОДКЛЮЧЕНИЕ ГОЛОСА (welcome.mp3) ЧЕРЕЗ АНАЛОГОВЫЙ ФИЛЬТР СОВЕТСКОГО РАДИО
+    if (!isVoiceInitialized) {
+      voiceAudio = document.getElementById('radioVoice');
+      try {
+        voiceSource = ctx.createMediaElementSource(voiceAudio);
+        
+        // Полосовой фильтр (срезает верха и низы, создавая глухой раструбный звук динамика)
+        voiceFilter = ctx.createBiquadFilter();
+        voiceFilter.type = 'bandpass';
+        voiceFilter.frequency.value = 1350;
+        voiceFilter.Q.value = 0.85;
+
+        voiceGain = ctx.createGain();
+        voiceGain.gain.setValueAtTime(0.0, ctx.currentTime);
+
+        voiceSource.connect(voiceFilter);
+        voiceFilter.connect(voiceGain);
+        voiceGain.connect(ctx.destination);
+        isVoiceInitialized = true;
+      } catch(e) {
+        console.log("Voice audio initialization:", e);
+      }
+    }
   }
 
   function updateRadioAudio() {
     if (!isRadioOn || !audioCtx) return;
     const ctx = audioCtx;
+
+    // Станции: 68.2 (Голос из welcome.mp3), 94.7 (Цветок-9), 105.1 (Мачта №4)
     const stations = [
-      { f: 68.2, name: 'УЗЕЛ СВЯЗИ • ПОЗЫВНЫЕ', tone: 440, type: 'chime' },
+      { f: 68.2, name: 'УЗЕЛ СВЯЗИ • ДИСПЕТЧЕР ЖЭК', type: 'voice' },
       { f: 94.7, name: '«ЦВЕТОК-9» • НОМЕРНАЯ', tone: 880, type: 'numbers' },
       { f: 105.1, name: 'МАЧТА №4 • НЕСУЩАЯ', tone: 54, type: 'hum' }
     ];
@@ -1153,7 +1170,7 @@
       const signalPower = Math.max(0, 1 - (closestDist / 1.4));
       magicEye.classList.add('active');
       magicEye.style.opacity = (0.2 + signalPower * 0.8).toFixed(2);
-      noiseGain.gain.setTargetAtTime(0.12 * (1 - signalPower * 0.8), ctx.currentTime, 0.05);
+      noiseGain.gain.setTargetAtTime(0.12 * (1 - signalPower * 0.75), ctx.currentTime, 0.05);
 
       if (closestDist > 0.08 && closestDist < 0.9) {
         heterodyneWhistle.frequency.setTargetAtTime(closestDist * 3200, ctx.currentTime, 0.05);
@@ -1162,17 +1179,28 @@
         heterodyneGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
       }
 
-      stationGain.gain.setTargetAtTime(0.25 * signalPower, ctx.currentTime, 0.05);
-      if (activeStation.type === 'hum') {
-        stationOsc1.type = 'sawtooth'; stationOsc1.frequency.setTargetAtTime(50, ctx.currentTime, 0.05);
-        stationOsc2.type = 'sine'; stationOsc2.frequency.setTargetAtTime(100, ctx.currentTime, 0.05);
-      } else if (activeStation.type === 'numbers') {
-        stationOsc1.type = 'square'; stationOsc1.frequency.setTargetAtTime(750, ctx.currentTime, 0.05);
-        stationOsc2.type = 'sine'; stationOsc2.frequency.setTargetAtTime(375, ctx.currentTime, 0.05);
+      // Если мы на частоте 68.2 МГц — включаем голос диспетчера!
+      if (activeStation.type === 'voice') {
+        stationGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
+        if (voiceGain) {
+          voiceGain.gain.setTargetAtTime(0.85 * signalPower, ctx.currentTime, 0.05);
+        }
+        if (voiceAudio && voiceAudio.paused) {
+          voiceAudio.play().catch(() => {});
+        }
       } else {
-        stationOsc1.type = 'sine'; stationOsc1.frequency.setTargetAtTime(activeStation.tone, ctx.currentTime, 0.05);
-        stationOsc2.type = 'triangle'; stationOsc2.frequency.setTargetAtTime(activeStation.tone * 1.5, ctx.currentTime, 0.05);
+        // Другие станции (генераторы)
+        if (voiceGain) voiceGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
+        stationGain.gain.setTargetAtTime(0.25 * signalPower, ctx.currentTime, 0.05);
+        if (activeStation.type === 'hum') {
+          stationOsc1.type = 'sawtooth'; stationOsc1.frequency.setTargetAtTime(50, ctx.currentTime, 0.05);
+          stationOsc2.type = 'sine'; stationOsc2.frequency.setTargetAtTime(100, ctx.currentTime, 0.05);
+        } else if (activeStation.type === 'numbers') {
+          stationOsc1.type = 'square'; stationOsc1.frequency.setTargetAtTime(750, ctx.currentTime, 0.05);
+          stationOsc2.type = 'sine'; stationOsc2.frequency.setTargetAtTime(375, ctx.currentTime, 0.05);
+        }
       }
+
       freqText.innerText = `${currentFreq.toFixed(1)} МГц [${activeStation.name}]`;
     } else {
       magicEye.classList.remove('active');
@@ -1180,6 +1208,7 @@
       noiseGain.gain.setTargetAtTime(0.18, ctx.currentTime, 0.05);
       heterodyneGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
       stationGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
+      if (voiceGain) voiceGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
       freqText.innerText = `${currentFreq.toFixed(1)} МГц [ЭФИР]`;
     }
   }
@@ -1210,7 +1239,9 @@
         noiseGain?.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.05);
         stationGain?.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.05);
         heterodyneGain?.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.05);
+        voiceGain?.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.05);
       }
+      if (voiceAudio) voiceAudio.pause();
     }
   });
 
