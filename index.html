@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Удостоверение Личности ПГТ Нижний Исток</title>
+  <title>КПК «ИСТОК-М» • ПГТ Нижний Исток</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
-      --bg-color: #0b0d10;
+      --pda-shell: #16181b;
+      --pda-screen-bg: #090c0a;
+      --pda-amber: #d4a373;
+      --pda-green: #38b000;
       --card-bg: #e6e0d2;
       --stamp-color: #2b3a67;
       --leather-color: #22140d;
@@ -16,496 +19,554 @@
     }
     * { box-sizing: border-box; }
     body {
-      background: radial-gradient(circle at 50% 42%, #222933 0%, #0b0d10 75%);
+      background: #050608;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       margin: 0;
-      perspective: 1200px;
       font-family: 'Courier New', Courier, monospace;
       overflow: hidden;
       touch-action: none;
       user-select: none;
     }
 
-    /* 3D Сцена */
-    .scene {
-      width: 320px;
-      height: 480px;
+    /* ВНЕШНИЙ КОРПУС КПК (STALKER STYLE) */
+    .pda-device {
+      width: 360px;
+      height: 640px;
+      background: var(--pda-shell);
+      border: 4px solid #282d33;
+      border-radius: 24px;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.95), inset 0 0 15px rgba(0,0,0,0.8);
       position: relative;
+      padding: 14px 12px 16px 12px;
+      display: flex;
+      flex-direction: column;
     }
-    .card-wrap {
-      width: 100%;
-      height: 100%;
+
+    /* Рельефные винты по углам */
+    .bolt {
       position: absolute;
-      transform-style: preserve-3d;
+      width: 8px;
+      height: 8px;
+      background: #3a4149;
+      border-radius: 50%;
+      box-shadow: inset 0 1px 2px #000, 0 1px 1px rgba(255,255,255,0.1);
+    }
+    .bolt-tl { top: 7px; left: 10px; }
+    .bolt-tr { top: 7px; right: 10px; }
+    .bolt-bl { bottom: 7px; left: 10px; }
+    .bolt-br { bottom: 7px; right: 10px; }
+
+    /* Верхняя грань: Индикатор связи и маркировка */
+    .pda-top-bezel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 8px 8px 8px;
+      font-size: 9px;
+      color: #66727f;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+    .status-led {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--pda-green);
+      box-shadow: 0 0 8px var(--pda-green);
+      animation: ledPulse 3s infinite;
+    }
+    @keyframes ledPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+    /* ВНУТРЕННИЙ ДИСПЛЕЙ С ЭФФЕКТОМ SCANLINES */
+    .pda-screen {
+      flex: 1;
+      background: var(--pda-screen-bg);
+      border: 2px solid #1f2722;
       border-radius: 12px;
-      cursor: grab;
-      transition: box-shadow 0.1s;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: inset 0 0 25px rgba(0,0,0,0.9);
+    }
+    .pda-screen::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
+      pointer-events: none;
+      z-index: 90;
+    }
+
+    /* СТАТУС-БАР КПК (ЕДИНОЕ ВРЕМЯ UTC+9) */
+    .pda-hud {
+      background: rgba(16, 26, 20, 0.95);
+      border-bottom: 1px solid #233829;
+      padding: 6px 10px;
+      font-size: 10px;
+      color: #6b9376;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 80;
+    }
+    .pda-hud-time { color: var(--pda-amber); font-weight: bold; }
+
+    /* ЭКРАНЫ КПК */
+    .pda-view {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      padding: 10px;
+      overflow-y: auto;
+      position: relative;
+      z-index: 50;
+    }
+    .pda-view.active { display: flex; }
+
+    /* ГЛАВНОЕ МЕНЮ: СЕТКА МОДУЛЕЙ СТАЛКЕРА */
+    .menu-header {
+      font-size: 12px;
+      color: #4ade80;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #1a3322;
+      padding-bottom: 4px;
+    }
+    .grid-menu {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 5px;
+    }
+    .pda-app-btn {
+      background: #0f1612;
+      border: 1px solid #233b2a;
+      border-radius: 8px;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.7);
+      transition: all 0.15s;
+    }
+    .pda-app-btn:active {
+      background: #1b2e20;
+      border-color: #4ade80;
+      transform: scale(0.97);
+    }
+    .pda-app-icon { font-size: 24px; }
+    .pda-app-title {
+      font-size: 10px;
+      font-weight: bold;
+      color: #9cb8a3;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    /* КНОПКА ВОЗВРАТА [◄ МЕНЮ КПК] */
+    .btn-back-pda {
+      align-self: flex-start;
+      background: #101c13;
+      color: #72a37d;
+      border: 1px solid #233e29;
+      padding: 6px 12px;
+      font-size: 10px;
+      font-family: inherit;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .btn-back-pda:active { background: #1b3320; color: #4ade80; }
+
+    /* ==================== МОДУЛЬ: ПАСПОРТ ==================== */
+    .passport-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      perspective: 1200px;
+      flex: 1;
+    }
+    .scene { width: 280px; height: 420px; position: relative; }
+    .card-wrap {
+      width: 100%; height: 100%; position: absolute;
+      transform-style: preserve-3d; border-radius: 12px; cursor: grab;
     }
     .card-wrap:active { cursor: grabbing; }
-
-    .card-face {
-      position: absolute;
-      inset: 0;
-      backface-visibility: hidden;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    /* Лицевая сторона */
+    .card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 12px; overflow: hidden; }
     .card-front {
-      background: var(--card-bg);
-      border: 2px solid #5a544b;
-      padding: 18px;
-      background-image: radial-gradient(#d3cbba 15%, transparent 16%);
-      background-size: 14px 14px;
+      background: var(--card-bg); border: 2px solid #5a544b; padding: 14px;
+      background-image: radial-gradient(#d3cbba 15%, transparent 16%); background-size: 14px 14px;
       transform: translateZ(calc(var(--card-depth) / 2));
     }
-
-    /* Оборотная сторона (Кожаная обложка) */
     .card-back {
-      background: var(--leather-color);
-      border: 2px solid #140d0a;
+      background: var(--leather-color); border: 2px solid #140d0a;
       transform: rotateY(180deg) translateZ(calc(var(--card-depth) / 2));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       box-shadow: inset 0 0 60px rgba(0,0,0,0.85);
-      background-image: 
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 80%),
+      background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 80%),
         repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 2px, transparent 2px, transparent 4px);
     }
+    .card-edge-left, .card-edge-right { position: absolute; top: 0; width: var(--card-depth); height: 100%; background: #170e0a; }
+    .card-edge-left { left: calc(var(--card-depth) / -2); transform: rotateY(-90deg); }
+    .card-edge-right { right: calc(var(--card-depth) / -2); transform: rotateY(90deg); }
+    .card-edge-top, .card-edge-bottom { position: absolute; left: 0; width: 100%; height: var(--card-depth); background: #1a100c; }
+    .card-edge-top { top: calc(var(--card-depth) / -2); transform: rotateX(90deg); }
+    .card-edge-bottom { bottom: calc(var(--card-depth) / -2); transform: rotateX(-90deg); }
 
-    /* 3D Торцы (Все 4 грани для цельного бруска) */
-    .card-edge-left, .card-edge-right {
-      position: absolute;
-      top: 0;
-      width: var(--card-depth);
-      height: 100%;
-      background: #170e0a;
-      box-shadow: inset 0 0 4px rgba(0,0,0,0.9);
-    }
-    .card-edge-left {
-      left: calc(var(--card-depth) / -2);
-      transform: rotateY(-90deg);
-    }
-    .card-edge-right {
-      right: calc(var(--card-depth) / -2);
-      transform: rotateY(90deg);
-    }
-
-    .card-edge-top, .card-edge-bottom {
-      position: absolute;
-      left: 0;
-      width: 100%;
-      height: var(--card-depth);
-      background: #1a100c;
-      box-shadow: inset 0 0 4px rgba(0,0,0,0.9);
-    }
-    .card-edge-top {
-      top: calc(var(--card-depth) / -2);
-      transform: rotateX(90deg);
-    }
-    .card-edge-bottom {
-      bottom: calc(var(--card-depth) / -2);
-      transform: rotateX(-90deg);
-    }
-
-    /* Блик ламината */
     .glare {
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,0.2) 45%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.2) 55%, transparent 80%);
-      pointer-events: none;
-      z-index: 10;
-      mix-blend-mode: overlay;
-      opacity: 0.7;
+      pointer-events: none; z-index: 10; mix-blend-mode: overlay; opacity: 0.7;
     }
-
-    /* Защитная полоса */
     .hologram-strip {
-      position: absolute;
-      top: 0;
-      right: 12px;
-      width: 12px;
-      height: 100%;
+      position: absolute; top: 0; right: 10px; width: 10px; height: 100%;
       background: linear-gradient(180deg, #ff0080, #7928ca, #0070f3, #00dfd8, #7928ca, #ff0080);
-      background-size: 100% 300%;
-      opacity: 0.45;
-      mix-blend-mode: overlay;
-      animation: holoShift 5s ease infinite;
-      pointer-events: none;
-      z-index: 5;
+      background-size: 100% 300%; opacity: 0.45; mix-blend-mode: overlay;
+      animation: holoShift 5s ease infinite; pointer-events: none; z-index: 5;
     }
-    @keyframes holoShift {
-      0% { background-position: 0% 0%; }
-      50% { background-position: 0% 100%; }
-      100% { background-position: 0% 0%; }
-    }
+    @keyframes holoShift { 0% { background-position: 0% 0%; } 50% { background-position: 0% 100%; } 100% { background-position: 0% 0%; } }
 
-    /* Заголовок */
-    .header {
-      text-align: center;
-      font-size: 11px;
-      font-weight: bold;
-      border-bottom: 2px solid #333;
-      padding-bottom: 6px;
-      letter-spacing: 1px;
-      cursor: pointer;
-    }
-
-    /* Фото */
+    .header { text-align: center; font-size: 9.5px; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 5px; letter-spacing: 1px; cursor: pointer; }
     .photo-area {
-      position: relative;
-      width: 100px;
-      height: 120px;
-      border: 1px dashed #444;
-      background: #c2beb4;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      overflow: hidden;
-      margin-top: 14px;
+      position: relative; width: 90px; height: 110px; border: 1px dashed #444; background: #c2beb4;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; margin-top: 10px;
     }
-    .photo-area img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: grayscale(100%) contrast(130%) brightness(90%);
-    }
-    .photo-placeholder {
-      font-size: 10px;
-      color: #555;
-      text-align: center;
-      padding: 6px;
-    }
-
-    /* Поля бланка */
-    .fields {
-      font-size: 12px;
-      line-height: 1.55;
-    }
-    .editable-field {
-      border-bottom: 1px dashed #777;
-      cursor: pointer;
-      padding: 1px 3px;
-    }
+    .photo-area img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(130%) brightness(90%); }
+    .photo-placeholder { font-size: 9px; color: #555; text-align: center; }
+    .fields { font-size: 10.5px; line-height: 1.5; }
+    .editable-field { border-bottom: 1px dashed #777; cursor: pointer; padding: 1px 3px; }
     .editable-field:hover { background: rgba(0,0,0,0.06); }
 
-    /* Печать ЖЭК */
     .seal-button {
-      position: absolute;
-      bottom: 22px;
-      right: 20px;
-      width: 84px;
-      height: 84px;
-      border-radius: 50%;
-      border: 2px solid var(--stamp-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 8.5px;
-      color: var(--stamp-color);
-      cursor: pointer;
-      transform: rotate(-14deg);
-      background: transparent;
-      z-index: 6;
-      opacity: 0.88;
+      position: absolute; bottom: 15px; right: 15px; width: 74px; height: 74px; border-radius: 50%;
+      border: 2px solid var(--stamp-color); display: flex; align-items: center; justify-content: center;
+      text-align: center; font-size: 7.5px; color: var(--stamp-color); cursor: pointer; transform: rotate(-14deg);
+      background: transparent; z-index: 6; opacity: 0.88;
     }
     .seal-inner-ring {
-      position: absolute;
-      inset: 4px;
-      border: 1px solid var(--stamp-color);
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      line-height: 1.25;
-      pointer-events: none;
+      position: absolute; inset: 3px; border: 1px solid var(--stamp-color); border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.25; pointer-events: none;
     }
-
-    /* Задняя сторона: Золотое тиснение ПАСПОРТ */
-    .leather-stitch {
-      position: absolute;
-      inset: 8px;
-      border: 1px dashed rgba(184, 134, 11, 0.35);
-      border-radius: 8px;
-      pointer-events: none;
-    }
+    .leather-stitch { position: absolute; inset: 8px; border: 1px dashed rgba(184, 134, 11, 0.35); border-radius: 8px; pointer-events: none; }
     .leather-title {
-      position: absolute;
-      top: 50px;
-      color: rgba(184, 134, 11, 0.55);
-      font-size: 16px;
-      font-weight: bold;
-      letter-spacing: 5px;
-      text-shadow: 0 1px 1px rgba(255,255,255,0.1), 0 -1px 2px rgba(0,0,0,0.9);
-      pointer-events: none;
+      position: absolute; top: 40px; color: rgba(184, 134, 11, 0.55); font-size: 15px; font-weight: bold;
+      letter-spacing: 5px; text-shadow: 0 1px 1px rgba(255,255,255,0.1), 0 -1px 2px rgba(0,0,0,0.9); pointer-events: none;
     }
     .leather-crest-box {
-      width: 140px;
-      height: 140px;
-      border: 2px solid rgba(184, 134, 11, 0.25);
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      width: 120px; height: 120px; border: 2px solid rgba(184, 134, 11, 0.25); border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       box-shadow: inset 0 2px 8px rgba(0,0,0,0.7), 0 1px 1px rgba(255,255,255,0.05);
-      color: rgba(184, 134, 11, 0.3);
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-align: center;
-      margin-top: 25px;
+      color: rgba(184, 134, 11, 0.3); font-size: 9px; letter-spacing: 2px; text-align: center; margin-top: 25px;
     }
 
-    /* Ультрафиолетовый режим */
-    .uv-active {
-      filter: drop-shadow(0 0 22px rgba(138, 43, 226, 0.6)) !important;
+    .uv-active { filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.6)) !important; }
+    .uv-active .card-front { background: #110d1a !important; color: #9d8ec2 !important; background-image: none !important; border-color: #633299 !important; }
+    .uv-active .card-edge-top, .uv-active .card-edge-bottom, .uv-active .card-edge-left, .uv-active .card-edge-right {
+      background: #1c0d29 !important; box-shadow: inset 0 0 5px #8a2be2 !important;
     }
-    .uv-active .card-front {
-      background: #110d1a !important;
-      color: #9d8ec2 !important;
-      background-image: none !important;
-      border-color: #633299 !important;
-    }
-    .uv-active .card-edge-top,
-    .uv-active .card-edge-bottom,
-    .uv-active .card-edge-left,
-    .uv-active .card-edge-right {
-      background: #1c0d29 !important;
-      box-shadow: inset 0 0 5px #8a2be2 !important;
-    }
-    .uv-glow {
-      display: none;
-      position: absolute;
-      color: #00ffcc;
-      font-weight: bold;
-      text-shadow: 0 0 8px #00ffcc;
-      pointer-events: none;
-      opacity: 0.9;
-    }
+    .uv-glow { display: none; position: absolute; color: #00ffcc; font-weight: bold; text-shadow: 0 0 8px #00ffcc; pointer-events: none; opacity: 0.9; }
     .uv-active .uv-glow { display: block; }
-
     .uv-diagonal-stamp {
-      top: 215px;
-      left: 10px;
-      width: 290px;
-      text-align: center;
-      border: 2px solid rgba(0, 255, 204, 0.4);
-      padding: 6px;
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      transform: rotate(-18deg);
-      border-radius: 4px;
-      background: rgba(0, 255, 204, 0.05);
+      top: 185px; left: 10px; width: 250px; text-align: center; border: 2px solid rgba(0, 255, 204, 0.4);
+      padding: 5px; font-size: 9.5px; letter-spacing: 1.2px; transform: rotate(-18deg); border-radius: 4px; background: rgba(0, 255, 204, 0.05);
     }
-    .uv-bottom-code {
-      bottom: 28px;
-      left: 20px;
-      font-size: 10px;
-      letter-spacing: 1px;
+    .uv-bottom-code { bottom: 20px; left: 15px; font-size: 8.5px; letter-spacing: 1px; }
+
+    .passport-controls { display: flex; gap: 8px; margin-top: 12px; }
+    .btn-act {
+      background: #152219; color: #8cb896; border: 1px solid #284430; padding: 6px 14px;
+      font-family: inherit; font-size: 11px; border-radius: 4px; cursor: pointer;
+    }
+    .btn-act:active { background: #1f3825; color: #4ade80; }
+
+    /* ==================== МОДУЛЬ: РАДИО ==================== */
+    .radio-unit {
+      background: #14110f; border: 2px solid #2d2420; border-radius: 12px;
+      padding: 12px; margin-top: 5px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    }
+    .radio-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3a302a; padding-bottom: 6px; margin-bottom: 10px; }
+    .radio-brand { color: #9e8a78; font-size: 11px; font-weight: bold; letter-spacing: 2px; }
+    .magic-eye { width: 16px; height: 16px; border-radius: 50%; background: #111; border: 1px solid #333; transition: all 0.2s; }
+    .magic-eye.active { background: #00ff66; box-shadow: 0 0 10px #00ff66; }
+
+    .radio-dial-glass {
+      width: 100%; height: 75px; background: #0e0d0b; border: 1px solid #3d322a;
+      border-radius: 6px; position: relative; overflow: hidden; cursor: pointer;
+    }
+    .radio-dial-glass.powered { background: radial-gradient(circle at 50% 50%, #302416 0%, #0e0d0b 80%); }
+    .dial-markings { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 6px 10px; color: #55483c; font-size: 8.5px; font-weight: bold; }
+    .radio-dial-glass.powered .dial-markings { color: #d4a373; }
+    .dial-stations-row { display: flex; justify-content: space-between; border-bottom: 1px solid #4a3d32; padding-bottom: 2px; }
+    .dial-needle { position: absolute; top: 0; bottom: 0; width: 2px; background: #e63946; box-shadow: 0 0 6px #e63946; left: 10%; pointer-events: none; }
+
+    .current-freq-display { text-align: center; margin: 8px 0; font-size: 11px; color: #d4a373; font-weight: bold; }
+    .speaker-grill {
+      height: 70px; background: repeating-linear-gradient(0deg, #120e0c 0px, #120e0c 3px, #221b17 3px, #221b17 6px);
+      border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; color: #3d3129; font-size: 9px;
+    }
+    .radio-controls { display: flex; justify-content: space-around; align-items: center; }
+    .switch-btn { width: 40px; height: 40px; border-radius: 50%; background: #2b221d; border: 2px solid #4a3b32; color: #d4a373; cursor: pointer; font-size: 9px; font-weight: bold; }
+    .switch-btn.on { background: #1c2e1f; border-color: #386641; color: #70e000; box-shadow: 0 0 10px rgba(112,224,0,0.3); }
+    .knob { width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #3a2e26 0%, #161210 80%); border: 2px solid #4a3c33; position: relative; cursor: ew-resize; }
+    .knob-marker { position: absolute; top: 5px; left: calc(50% - 2px); width: 4px; height: 12px; background: #d4a373; }
+
+    /* ЗАГЛУШКИ ДЛЯ ОСТАЛЬНЫХ МОДУЛЕЙ */
+    .stub-terminal {
+      flex: 1; border: 1px dashed #233b2a; border-radius: 8px; padding: 15px;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+      color: #62876b; font-size: 11px; line-height: 1.6;
     }
 
-    /* Кнопки */
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-top: 25px;
-      z-index: 20;
-    }
-    .btn {
-      background: #1f2329;
-      color: #cfd3dc;
-      border: 1px solid #3d4450;
-      padding: 9px 18px;
-      font-family: inherit;
-      font-size: 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn:active { background: #2a303a; transform: translateY(1px); }
-
-    /* Модальное окно */
+    /* МОДАЛЬНОЕ ОКНО */
     .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 20px;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
+      align-items: center; justify-content: center; z-index: 100; padding: 20px;
     }
-    .modal-box {
-      background: #e6e0d2;
-      border: 2px solid #333;
-      padding: 20px;
-      width: 100%;
-      max-width: 310px;
-      border-radius: 8px;
-      font-size: 12px;
-      color: #222;
-    }
-    .modal-box input, .modal-box select {
-      width: 100%;
-      padding: 9px;
-      margin: 10px 0 15px 0;
-      font-family: inherit;
-      border: 1px solid #444;
-      background: #f7f5ef;
-      font-size: 12px;
-    }
-    .modal-box button {
-      width: 100%;
-      padding: 9px;
-      background: #2b3a67;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-      font-weight: bold;
-    }
+    .modal-box { background: #e6e0d2; border: 2px solid #333; padding: 18px; width: 100%; max-width: 290px; border-radius: 8px; font-size: 11px; color: #222; }
+    .modal-box input, .modal-box select { width: 100%; padding: 8px; margin: 8px 0 12px 0; font-family: inherit; border: 1px solid #444; background: #f7f5ef; font-size: 11px; }
+    .modal-box button { width: 100%; padding: 8px; background: #2b3a67; color: #fff; border: none; cursor: pointer; font-family: inherit; font-weight: bold; }
 
-    /* Секретный слой Бюро */
     .bureau-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(8, 8, 12, 0.96);
-      color: #ff3838;
-      padding: 22px;
-      border-radius: 12px;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      font-size: 11px;
-      z-index: 30;
+      position: absolute; inset: 0; background: rgba(8, 8, 12, 0.96); color: #ff3838; padding: 18px;
+      border-radius: 12px; display: none; flex-direction: column; justify-content: center; font-size: 10px; z-index: 30;
       animation: glitch 0.2s infinite;
     }
-    @keyframes glitch {
-      0% { transform: translate(0) }
-      20% { transform: translate(-2px, 1px) }
-      40% { transform: translate(1px, -2px) }
-      60% { transform: translate(-1px, 2px) }
-      80% { transform: translate(2px, -1px) }
-      100% { transform: translate(0) }
-    }
+    @keyframes glitch { 0% { transform: translate(0) } 20% { transform: translate(-2px, 1px) } 40% { transform: translate(1px, -2px) } 60% { transform: translate(-1px, 2px) } 80% { transform: translate(2px, -1px) } 100% { transform: translate(0) } }
   </style>
 </head>
 <body>
 
-<div class="scene" id="sceneContainer">
-  <div class="card-wrap" id="card">
+<div class="pda-device">
+  <div class="bolt bolt-tl"></div>
+  <div class="bolt bolt-tr"></div>
+  <div class="bolt bolt-bl"></div>
+  <div class="bolt bolt-br"></div>
+
+  <!-- Верхняя металлическая планка КПК -->
+  <div class="pda-top-bezel">
+    <span>КПК «ИСТОК-М»</span>
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <span>СВЯЗЬ</span>
+      <div class="status-led"></div>
+    </div>
+  </div>
+
+  <!-- Внутренний дисплей -->
+  <div class="pda-screen">
     
-    <!-- 4 Торца объемного паспорта -->
-    <div class="card-edge-left"></div>
-    <div class="card-edge-right"></div>
-    <div class="card-edge-top"></div>
-    <div class="card-edge-bottom"></div>
+    <!-- СТАТУС-БАР: ЕДИНОЕ ВРЕМЯ UTC+9 ДЛЯ ВСЕХ -->
+    <div class="pda-hud">
+      <span id="hudCallsign">ОЛЬКА • ИСТ-92</span>
+      <span class="pda-hud-time" id="hudClock">12:00 [ИСТОК]</span>
+      <span>МАЧТА-4: 86%</span>
+    </div>
 
-    <!-- ЛИЦЕВАЯ СТОРОНА -->
-    <div class="card-face card-front" id="passportFront">
-      <div class="glare"></div>
-      <div class="hologram-strip"></div>
-      
-      <div class="header" id="headerTitle">ПГТ НИЖНИЙ ИСТОК • ПОДЛИННОЕ УДОСТОВЕРЕНИЕ</div>
-      
-      <div style="display: flex; gap: 14px;">
-        <div class="photo-area" id="photoTrigger" title="Нажмите, чтобы загрузить фото">
-          <img id="userPhoto" style="display: none;" alt="Фото">
-          <div class="photo-placeholder" id="photoPlaceholder">ФОТО<br><span style="font-size:8px;">[нажмите]</span></div>
-        </div>
+    <!-- 1. ГЛАВНЫЙ ЭКРАН КПК (МЕНЮ ПРИЛОЖЕНИЙ) -->
+    <div class="pda-view active" id="viewMenu">
+      <div class="menu-header">СИСТЕМА ВЫЧИСЛЕНИЙ • ГЛАВНЫЙ УЗЕЛ</div>
+      <div class="grid-menu">
         
-        <div class="fields" style="margin-top: 14px;">
-          <div><strong>СЕРИЯ:</strong> <span id="pSeries">ИСТ-79</span></div>
-          <div><strong>НОМЕР:</strong> <span id="pNumber">049281</span></div>
-          <div style="margin-top: 6px;">
-            <strong>ПРОПИСКА:</strong><br>
-            <span class="editable-field" id="pAddress">Ул. Строителей, д. 12</span>
-          </div>
+        <div class="pda-app-btn" id="openPassportApp">
+          <div class="pda-app-icon">🪪</div>
+          <div class="pda-app-title">УДОСТОВЕРЕНИЕ</div>
         </div>
-      </div>
 
-      <div class="fields" style="margin-top: 26px;">
-        <div>
-          <strong>ГРАЖДАНИН:</strong><br>
-          <span class="editable-field" id="pName">Житель посёлка</span>
+        <div class="pda-app-btn" id="openRadioApp">
+          <div class="pda-app-icon">📻</div>
+          <div class="pda-app-title">РАДИОСКАНЕР</div>
         </div>
-        <div style="margin-top: 8px;">
-          <strong>ПРОФЕССИЯ:</strong><br>
-          <span class="editable-field" id="pProf">Радиомеханик узла связи</span>
+
+        <div class="pda-app-btn" onclick="openStub('КАРТА СЕКТОРА', 'Спутниковая развёртка недоступна. Радиомачта №4 подавляет сторонние сигналы. Ориентируйтесь по визуальным ориентирам посёлка.')">
+          <div class="pda-app-icon">🗺️</div>
+          <div class="pda-app-title">КАРТА СЕКТОРА</div>
         </div>
-        <div style="margin-top: 10px;"><strong>СТАТУС:</strong> <span style="color: #2e7d32;" id="pStatusText">БЛАГОНАДЁЖЕН</span></div>
-      </div>
 
-      <!-- Резиновая печать ЖЭК -->
-      <div class="seal-button" id="secretSeal">
-        <div class="seal-inner-ring">
-          ОТДЕЛ КАДРОВ<br>ЖЭК №1<br>★
+        <div class="pda-app-btn" onclick="openStub('ДИСПЕТЧЕР ЖЭК', 'Журнал обращений ЖЭК №1. Приём жалоб на перебои электросети и посторонние шумы в коммуникациях. Дежурный диспетчер на смене.')">
+          <div class="pda-app-icon">🏢</div>
+          <div class="pda-app-title">ДИСПЕТЧЕР ЖЭК</div>
         </div>
-      </div>
 
-      <!-- УФ Метки -->
-      <div class="uv-glow uv-diagonal-stamp">[ ПЛОМБА №4 • ИЛЛЮЗИЯ СТАБИЛЬНА ]</div>
-      <div class="uv-glow uv-bottom-code">ФОРМА УЧЁТА: СПЯЩИЙ • ЭФИР 94.7 МГц</div>
+        <div class="pda-app-btn" onclick="openStub('СНАРЯЖЕНИЕ', 'Личные карманы гражданина. Талоны на керосин, ключи от подвалов и памятки учёта.')">
+          <div class="pda-app-icon">🎒</div>
+          <div class="pda-app-title">СНАРЯЖЕНИЕ</div>
+        </div>
 
-      <!-- Секретный слой Бюро -->
-      <div class="bureau-overlay" id="secretLayer">
-        <h3>[БЮРО ПАРАДИГМАЛЬНЫХ ИССЛЕДОВАНИЙ]</h3>
-        <p>ФОРМА ДОПУСКА: КАТЕГОРИЯ «СМУТА»</p>
-        <p>ОБЪЕКТ: СУБЪЕКТ УДЕРЖИВАЕТСЯ В СЕТКЕ ВЕЩАНИЯ.</p>
-        <p>ИНСТРУКЦИЯ: ИГНОРИРУЙТЕ НОЧНЫЕ СТУКИ В ОКНА.</p>
-        <small style="color: #888; margin-top: 15px;">Двойной клик, чтобы свернуть протокол</small>
+        <div class="pda-app-btn" onclick="openStub('ДЕПЕШИ ГО/ЧС', 'Архив сводок комендатуры. Экстренные оповещения по посёлку: Пломба №4 удерживает контур. Покидать жилой сектор после 23:00 запрещено.')">
+          <div class="pda-app-icon">📟</div>
+          <div class="pda-app-title">ДЕПЕШИ ГО/ЧС</div>
+        </div>
+
       </div>
     </div>
 
-    <!-- ОБОРОТНАЯ СТОРОНА -->
-    <div class="card-face card-back" id="passportBack">
-      <div class="leather-stitch"></div>
-      <div class="leather-title">ПАСПОРТ</div>
-      <div class="leather-crest-box">
-        <div>[ МЕСТО ДЛЯ ГЕРБА ]</div>
-        <div style="font-size: 8px; margin-top: 6px; opacity: 0.6;">НИЖНИЙ ИСТОК</div>
+    <!-- 2. МОДУЛЬ: УДОСТОВЕРЕНИЕ -->
+    <div class="pda-view" id="viewPassport">
+      <button class="btn-back-pda" id="backFromPassport">◄ МЕНЮ КПК</button>
+      
+      <div class="passport-box">
+        <div class="scene" id="sceneContainer">
+          <div class="card-wrap" id="card">
+            <div class="card-edge-left"></div>
+            <div class="card-edge-right"></div>
+            <div class="card-edge-top"></div>
+            <div class="card-edge-bottom"></div>
+
+            <!-- Лицо бланка -->
+            <div class="card-face card-front" id="passportFront">
+              <div class="glare"></div>
+              <div class="hologram-strip"></div>
+              <div class="header" id="headerTitle">ПГТ НИЖНИЙ ИСТОК • ПОДЛИННОЕ УДОСТОВЕРЕНИЕ</div>
+              
+              <div style="display: flex; gap: 10px;">
+                <div class="photo-area" id="photoTrigger">
+                  <img id="userPhoto" style="display: none;" alt="Фото">
+                  <div class="photo-placeholder" id="photoPlaceholder">ФОТО<br><span style="font-size:7px;">[нажмите]</span></div>
+                </div>
+                
+                <div class="fields" style="margin-top: 10px;">
+                  <div><strong>СЕРИЯ:</strong> <span id="pSeries">ИСТ-79</span></div>
+                  <div><strong>НОМЕР:</strong> <span id="pNumber">049281</span></div>
+                  <div style="margin-top: 4px;">
+                    <strong>ПРОПИСКА:</strong><br>
+                    <span class="editable-field" id="pAddress">Ул. Строителей, д. 12</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fields" style="margin-top: 18px;">
+                <div>
+                  <strong>ГРАЖДАНИН:</strong><br>
+                  <span class="editable-field" id="pName">Житель посёлка</span>
+                </div>
+                <div style="margin-top: 6px;">
+                  <strong>ПРОФЕССИЯ:</strong><br>
+                  <span class="editable-field" id="pProf">Радиомеханик узла связи</span>
+                </div>
+                <div style="margin-top: 6px;"><strong>СТАТУС:</strong> <span style="color: #2e7d32;" id="pStatusText">БЛАГОНАДЁЖЕН</span></div>
+              </div>
+
+              <div class="seal-button" id="secretSeal">
+                <div class="seal-inner-ring">ОТДЕЛ КАДРОВ<br>ЖЭК №1<br>★</div>
+              </div>
+
+              <div class="uv-glow uv-diagonal-stamp">[ ПЛОМБА №4 • ИЛЛЮЗИЯ СТАБИЛЬНА ]</div>
+              <div class="uv-glow uv-bottom-code">ФОРМА УЧЁТА: СПЯЩИЙ • ЭФИР 94.7 МГц</div>
+
+              <div class="bureau-overlay" id="secretLayer">
+                <h3>[БЮРО ПАРАДИГМАЛЬНЫХ ИССЛЕДОВАНИЙ]</h3>
+                <p>ФОРМА ДОПУСКА: КАТЕГОРИЯ «СМУТА»</p>
+                <p>ОБЪЕКТ: СУБЪЕКТ УДЕРЖИВАЕТСЯ В СЕТКЕ ВЕЩАНИЯ.</p>
+                <p>ИНСТРУКЦИЯ: ИГНОРИРУЙТЕ НОЧНЫЕ СТУКИ В ОКНА.</p>
+                <small style="color: #888; margin-top: 10px;">Двойной клик, чтобы свернуть</small>
+              </div>
+            </div>
+
+            <!-- Кожаный задник -->
+            <div class="card-face card-back" id="passportBack">
+              <div class="leather-stitch"></div>
+              <div class="leather-title">ПАСПОРТ</div>
+              <div class="leather-crest-box">
+                <div>[ МЕСТО ДЛЯ ГЕРБА ]</div>
+                <div style="font-size: 8px; margin-top: 4px; opacity: 0.6;">НИЖНИЙ ИСТОК</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="passport-controls">
+          <button class="btn-act" id="exportBtn">📸 Сохранить фото</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. МОДУЛЬ: РАДИОСКАНЕР -->
+    <div class="pda-view" id="viewRadio">
+      <button class="btn-back-pda" id="backFromRadio">◄ МЕНЮ КПК</button>
+      
+      <div class="radio-unit">
+        <div class="radio-header">
+          <div class="radio-brand">ИРЕНЬ • 401</div>
+          <div class="magic-eye" id="magicEye"></div>
+        </div>
+
+        <div class="radio-dial-glass" id="radioDial">
+          <div class="dial-markings">
+            <div class="dial-stations-row">
+              <span>64</span><span>УКВ-1</span><span>74</span><span>УКВ-2</span><span>88</span><span>FM</span><span>108</span>
+            </div>
+            <div style="display: flex; justify-content: space-around; opacity: 0.6; font-size: 7px;">
+              <span>|  |  |</span><span>|  |  |</span><span>|  |  |</span>
+            </div>
+          </div>
+          <div class="dial-needle" id="dialNeedle"></div>
+        </div>
+
+        <div class="current-freq-display" id="freqText">64.0 МГц [ПИТАНИЕ ОТКЛЮЧЕНО]</div>
+        <div class="speaker-grill">••• УЗЕЛ РАДИОВЕЩАНИЯ ПГТ •••</div>
+
+        <div class="radio-controls">
+          <button class="switch-btn" id="powerBtn">ВКЛ</button>
+          <div class="knob" id="tuningKnob"><div class="knob-marker"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ЗАГЛУШКА ДЛЯ ОСТАЛЬНЫХ МОДУЛЕЙ -->
+    <div class="pda-view" id="viewStub">
+      <button class="btn-back-pda" id="backFromStub">◄ МЕНЮ КПК</button>
+      <div class="stub-terminal">
+        <h3 id="stubTitle" style="color: #4ade80; margin-top: 0;">МОДУЛЬ</h3>
+        <p id="stubContent">Текст депеши...</p>
+        <span style="font-size: 8px; opacity: 0.5;">ПРОТОКОЛ БЕЗОПАСНОСТИ РАЙОНА • КОМЕНДАТУРА</span>
       </div>
     </div>
 
   </div>
 </div>
 
-<div class="controls">
-  <button class="btn" id="exportBtn">📸 Сохранить фото</button>
-</div>
-
 <input type="file" id="fileInput" accept="image/*" style="display: none;">
 
-<!-- Универсальное модальное окно -->
+<!-- МОДАЛКА ВВОДА ДАННЫХ -->
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal-box">
     <strong id="modalTitle">Регистрация в картотеке</strong>
-    <p style="font-size: 11px; color: #555; margin: 8px 0;" id="modalDesc">Данные заверяются печатью ЖЭК один раз.</p>
-    
+    <p style="font-size: 10px; color: #555; margin: 6px 0;" id="modalDesc">Данные заверяются печатью ЖЭК один раз.</p>
     <div id="modalInputContainer"></div>
     <button id="modalSaveBtn">Заверить данные в ЖЭК</button>
   </div>
 </div>
 
 <script>
-  // 1. Web Audio API
+  // 1. АУДИО ДВИЖОК: СТАЛКЕРСКИЙ КЛИК КПК
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
+  }
+
+  function playPdaBeep() {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1400, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.04);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.04);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.05);
   }
 
   function playStampThud() {
@@ -542,7 +603,43 @@
     }
   }
 
-  // 2. Инициализация пользователя
+  // 2. ЕДИНОЕ ПОСЕЛКОВОЕ ВРЕМЯ (UTC+9)
+  function updateIstokClock() {
+    const now = new Date();
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istokTime = new Date(utcTime + (3600000 * 9)); // Смещение UTC+9
+    const hours = String(istokTime.getHours()).padStart(2, '0');
+    const mins = String(istokTime.getMinutes()).padStart(2, '0');
+    document.getElementById('hudClock').innerText = `${hours}:${mins} [ИСТОК]`;
+  }
+  setInterval(updateIstokClock, 1000);
+  updateIstokClock();
+
+  // 3. ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ КПК
+  const viewMenu = document.getElementById('viewMenu');
+  const viewPassport = document.getElementById('viewPassport');
+  const viewRadio = document.getElementById('viewRadio');
+  const viewStub = document.getElementById('viewStub');
+
+  function showView(view) {
+    playPdaBeep();
+    [viewMenu, viewPassport, viewRadio, viewStub].forEach(v => v.classList.remove('active'));
+    view.classList.add('active');
+  }
+
+  document.getElementById('openPassportApp').addEventListener('click', () => showView(viewPassport));
+  document.getElementById('openRadioApp').addEventListener('click', () => showView(viewRadio));
+  document.getElementById('backFromPassport').addEventListener('click', () => showView(viewMenu));
+  document.getElementById('backFromRadio').addEventListener('click', () => showView(viewMenu));
+  document.getElementById('backFromStub').addEventListener('click', () => showView(viewMenu));
+
+  window.openStub = function(title, text) {
+    document.getElementById('stubTitle').innerText = title;
+    document.getElementById('stubContent').innerText = text;
+    showView(viewStub);
+  };
+
+  // 4. ДАННЫЕ ЖИТЕЛЯ И ТГ
   let tgUser = null;
   if (window.Telegram && window.Telegram.WebApp) {
     const tg = window.Telegram.WebApp;
@@ -559,39 +656,35 @@
   document.getElementById('pSeries').innerText = calculatedSeries;
   document.getElementById('pNumber').innerText = calculatedNumber;
 
-  // Восстановление полей из памяти
   const savedName = localStorage.getItem('istok_name');
-  if (savedName) {
-    document.getElementById('pName').innerText = savedName;
-  } else if (tgUser) {
-    document.getElementById('pName').innerText = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
-  }
+  const initialName = savedName || (tgUser ? tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '') : 'Житель посёлка');
+  document.getElementById('pName').innerText = initialName;
+  document.getElementById('hudCallsign').innerText = `${initialName.toUpperCase()} • ${calculatedSeries}`;
 
   const savedProf = localStorage.getItem('istok_prof');
   const savedAddr = localStorage.getItem('istok_addr');
   if (savedProf) document.getElementById('pProf').innerText = savedProf;
   if (savedAddr) document.getElementById('pAddress').innerText = savedAddr;
 
-  // 3. 3D Вращение с легким стартовым наклоном (для видимого объёма с первых секунд)
+  // 5. 3D ПАСПОРТ: СВОБОДНОЕ ВРАЩЕНИЕ
   const card = document.getElementById('card');
   let isDragging = false;
   let startX = 0, startY = 0;
-  let currentRotY = -7; // Стартовый ракурс
-  let currentRotX = 4;
-  let prevRotY = -7;
-  let prevRotX = 4;
+  let currentRotY = -7, currentRotX = 4;
+  let prevRotY = -7, prevRotX = 4;
   let hasDragged = false;
 
-  function applyTransform() {
+  function applyCardTransform() {
     card.style.transform = `rotateY(${currentRotY}deg) rotateX(${currentRotX}deg)`;
     const shadowX = -currentRotY * 1.5;
     const shadowY = Math.max(15, 25 + currentRotX * 1.2);
-    card.style.boxShadow = `${shadowX}px ${shadowY}px 45px rgba(0,0,0,0.85), 0 0 1px rgba(255,255,255,0.08)`;
+    card.style.boxShadow = `${shadowX}px ${shadowY}px 45px rgba(0,0,0,0.85)`;
   }
-  applyTransform();
+  applyCardTransform();
 
   window.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('#modalBackdrop') || e.target.closest('#exportBtn')) return;
+    if (!viewPassport.classList.contains('active')) return;
+    if (e.target.closest('#modalBackdrop') || e.target.closest('#exportBtn') || e.target.closest('.btn-back-pda')) return;
     isDragging = true;
     hasDragged = false;
     startX = e.clientX;
@@ -604,21 +697,16 @@
     if (!isDragging) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
-
-    if (Math.hypot(dx, dy) > 6) {
-      hasDragged = true;
-      clearHold();
-    }
-
+    if (Math.hypot(dx, dy) > 6) { hasDragged = true; clearHold(); }
     currentRotY = prevRotY + dx * 0.75;
     currentRotX = Math.max(-35, Math.min(35, prevRotX - dy * 0.45));
-    applyTransform();
+    applyCardTransform();
   });
 
   window.addEventListener('pointerup', () => { isDragging = false; });
   window.addEventListener('pointercancel', () => { isDragging = false; });
 
-  // 4. Загрузка фото
+  // 6. ФОТО ЖИТЕЛЯ
   const photoTrigger = document.getElementById('photoTrigger');
   const fileInput = document.getElementById('fileInput');
   const userPhoto = document.getElementById('userPhoto');
@@ -631,9 +719,7 @@
     photoPlaceholder.style.display = 'none';
   }
 
-  photoTrigger.addEventListener('click', () => {
-    if (!hasDragged) fileInput.click();
-  });
+  photoTrigger.addEventListener('click', () => { if (!hasDragged) fileInput.click(); });
 
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -643,8 +729,7 @@
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = 160;
-        canvas.height = 200;
+        canvas.width = 160; canvas.height = 200;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, 160, 200);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
@@ -659,11 +744,10 @@
     reader.readAsDataURL(file);
   });
 
-  // 5. УФ Режим (3 клика)
+  // 7. УФ И ПЕЧАТЬ
   const headerTitle = document.getElementById('headerTitle');
   const sceneContainer = document.getElementById('sceneContainer');
-  let headerClicks = 0;
-  let headerClickTimer = null;
+  let headerClicks = 0, headerClickTimer = null;
 
   headerTitle.addEventListener('click', () => {
     if (hasDragged) return;
@@ -677,7 +761,6 @@
     }
   });
 
-  // 6. Удержание печати ЖЭК
   const seal = document.getElementById('secretSeal');
   const secretLayer = document.getElementById('secretLayer');
   let holdTimer;
@@ -697,61 +780,28 @@
   seal.addEventListener('pointerleave', clearHold);
   secretLayer.addEventListener('dblclick', () => { secretLayer.style.display = 'none'; });
 
-  // 7. Алгоритм фильтрации нецензурной лексики и оскорблений (RU + EN + Leet)
+  // 8. АНТИМАТ ФИЛЬТР
   function isProfane(text) {
     if (!text || text.trim().length === 0) return true;
     let s = text.toLowerCase();
-
-    // Замена транслита, цифр и спецсимволов на стандартные буквы
     const leetMap = {
       '4': 'ч', '0': 'о', '1': 'и', '3': 'з', '6': 'б', '@': 'а', '$': 'с',
       'y': 'у', 'u': 'у', 'k': 'к', 'p': 'р', 'c': 'с', 'x': 'х', 'e': 'е',
       'a': 'а', 'o': 'о', 'b': 'б', 't': 'т', 'h': 'х', 'v': 'в', 'w': 'в'
     };
     s = s.split('').map(ch => leetMap[ch] || ch).join('');
-
-    // Удаляем любые разделители между буквами (звёздочки, точки, дефисы, пробелы)
     s = s.replace(/[^а-яa-z]/g, '');
-
-    // Сжимаем повторяющиеся подряд буквы (например: хххуууййй -> хуй)
     s = s.replace(/(.)\1+/g, '$1');
-
-    // Корни нецензурных слов и оскорблений (RU & EN)
     const badPatterns = [
-      /ху[йиеяюеё]/,
-      /п[иеё]зд/,
-      /[её]б[аеиоул]/,
-      /бл[яе]/,
-      /м[уy]д[аa][кkч]/,
-      /г[аa]нд[оo]н/,
-      /с[уy][чч4][кkаa]/,
-      /с[уy][кk][аa]/,
-      /чм[оo]/,
-      /з[аa]л[уy]п/,
-      /г[оo]вн/,
-      /д[еe]рьм/,
-      /др[оo]ч/,
-      /шл[юy]х/,
-      /п[ие]д[оa]р/,
-      /х[еe]р/,
-      /тв[аa]рь/,
-      /fuck/,
-      /bitch/,
-      /shit/,
-      /cunt/,
-      /dick/,
-      /asshole/,
-      /whore/,
-      /bastard/,
-      /pussy/,
-      /cock/,
-      /fag/
+      /ху[йиеяюеё]/, /п[иеё]зд/, /[её]б[аеиоул]/, /бл[яе]/, /м[уy]д[аa][кkч]/,
+      /г[аa]нд[оo]н/, /с[уy][чч4][кkаa]/, /с[уy][кk][аa]/, /чм[оo]/, /з[аa]л[уy]п/,
+      /г[оo]вн/, /д[еe]рьм/, /др[оo]ч/, /шл[юy]х/, /п[ие]д[оa]р/, /х[еe]р/, /тв[аa]рь/,
+      /fuck/, /bitch/, /shit/, /cunt/, /dick/, /asshole/, /whore/, /bastard/, /pussy/, /cock/, /fag/
     ];
-
     return badPatterns.some(rx => rx.test(s));
   }
 
-  // 8. Раздельное редактирование: Имя, Профессия, Прописка
+  // 9. МОДАЛКА
   const modalBackdrop = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
   const modalDesc = document.getElementById('modalDesc');
@@ -760,35 +810,21 @@
   let currentEditingField = null;
 
   const profList = [
-    'Радиомеханик узла связи',
-    'Фельдшер больницы №2',
-    'Слесарь ЖЭК №1',
-    'Продавец универмага',
-    'Кочегар котельной №3',
-    'Библиотекарь ДК «Строитель»',
-    'Водитель рейсового ПАЗа',
-    'Архивариус поссовета',
-    'Безработный житель'
+    'Радиомеханик узла связи', 'Фельдшер больницы №2', 'Слесарь ЖЭК №1',
+    'Продавец универмага', 'Кочегар котельной №3', 'Библиотекарь ДК «Строитель»',
+    'Водитель рейсового ПАЗа', 'Архивариус поссовета', 'Безработный житель'
   ];
-
   const addrList = [
-    'ул. Строителей, д. 12',
-    'ул. Строителей, д. 4',
-    'ул. Речная, д. 7',
-    'пер. Связистов, д. 2',
-    'Барачный сектор, дом 5',
-    'ул. Заводская, д. 18'
+    'ул. Строителей, д. 12', 'ул. Строителей, д. 4', 'ул. Речная, д. 7',
+    'пер. Связистов, д. 2', 'Барачный сектор, дом 5', 'ул. Заводская, д. 18'
   ];
 
   function openEditField(type) {
     if (hasDragged) return;
-
-    // Индивидуальная проверка блокировки для конкретного поля
     if (localStorage.getItem(`istok_${type}_locked`) === 'true') {
       alert('Данная графа уже заверена комендатурой ЖЭК №1.\nСамовольное внесение исправлений запрещено.\nДля смены обратитесь к диспетчеру посёлка.');
       return;
     }
-
     currentEditingField = type;
     modalInputContainer.innerHTML = '';
 
@@ -796,9 +832,7 @@
       modalTitle.innerText = 'Регистрация имени жителя';
       modalDesc.innerText = 'Укажите подлинное имя гражданина. Изменить его после регистрации будет невозможно.';
       const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.id = 'modalInputName';
-      inp.placeholder = 'Фамилия Имя или Имя...';
+      inp.type = 'text'; inp.id = 'modalInputName'; inp.placeholder = 'Фамилия Имя или Имя...';
       inp.value = document.getElementById('pName').innerText !== 'Житель посёлка' ? document.getElementById('pName').innerText : '';
       modalInputContainer.appendChild(inp);
     } else {
@@ -809,13 +843,11 @@
       const list = type === 'prof' ? profList : addrList;
       list.forEach(item => {
         const opt = document.createElement('option');
-        opt.value = item;
-        opt.innerText = item;
+        opt.value = item; opt.innerText = item;
         sel.appendChild(opt);
       });
       modalInputContainer.appendChild(sel);
     }
-
     modalBackdrop.style.display = 'flex';
   }
 
@@ -826,48 +858,39 @@
   modalSaveBtn.addEventListener('click', () => {
     if (currentEditingField === 'name') {
       const val = document.getElementById('modalInputName').value.trim();
-      if (!val || val.length < 2) {
-        alert('Имя должно содержать не менее 2 символов.');
-        return;
-      }
-      if (val.length > 25) {
-        alert('Слишком длинное имя для реестра.');
-        return;
-      }
+      if (!val || val.length < 2) { alert('Имя должно содержать не менее 2 символов.'); return; }
+      if (val.length > 25) { alert('Слишком длинное имя для реестра.'); return; }
       if (isProfane(val)) {
-        alert('ОТКАЗ В РЕГИСТРАЦИИ:\nКомендатура посёлка отклонила указанное имя за нарушение норм общественной морали.\nПожалуйста, укажите подобающее имя жителя.');
+        alert('ОТКАЗ В РЕГИСТРАЦИИ:\nКомендатура посёлка отклонила указанное имя за нарушение норм общественной морали.');
         return;
       }
-
       document.getElementById('pName').innerText = val;
+      document.getElementById('hudCallsign').innerText = `${val.toUpperCase()} • ${calculatedSeries}`;
       localStorage.setItem('istok_name', val);
-      localStorage.setItem('istok_name_locked', 'true'); // Блокируем только имя
+      localStorage.setItem('istok_name_locked', 'true');
     } else if (currentEditingField === 'prof') {
       const val = document.getElementById('modalSelectField').value;
       document.getElementById('pProf').innerText = val;
       localStorage.setItem('istok_prof', val);
-      localStorage.setItem('istok_prof_locked', 'true'); // Блокируем только профессию
+      localStorage.setItem('istok_prof_locked', 'true');
     } else if (currentEditingField === 'addr') {
       const val = document.getElementById('modalSelectField').value;
       document.getElementById('pAddress').innerText = val;
       localStorage.setItem('istok_addr', val);
-      localStorage.setItem('istok_addr_locked', 'true'); // Блокируем только прописку
+      localStorage.setItem('istok_addr_locked', 'true');
     }
-
     modalBackdrop.style.display = 'none';
     playStampThud();
   });
 
-  // 9. Экспорт в фото
+  // 10. ЭКСПОРТ В ФОТО
   const exportBtn = document.getElementById('exportBtn');
   exportBtn.addEventListener('click', () => {
     const originalTransform = card.style.transform;
     const normalizedY = ((currentRotY % 360) + 360) % 360;
     const isBackFacing = normalizedY > 90 && normalizedY < 270;
-
     card.style.transform = isBackFacing ? 'rotateY(180deg)' : 'rotateY(0deg)';
     const targetElement = isBackFacing ? document.getElementById('passportBack') : document.getElementById('passportFront');
-
     html2canvas(targetElement, { scale: 2, useCORS: true }).then(canvas => {
       card.style.transform = originalTransform;
       const link = document.createElement('a');
@@ -877,6 +900,171 @@
       playStampThud();
     });
   });
+
+  // 11. РАДИОПРИЁМНИК
+  let isRadioOn = false;
+  let currentFreq = 64.0;
+  const minFreq = 64.0, maxFreq = 108.0;
+
+  const powerBtn = document.getElementById('powerBtn');
+  const radioDial = document.getElementById('radioDial');
+  const dialNeedle = document.getElementById('dialNeedle');
+  const freqText = document.getElementById('freqText');
+  const magicEye = document.getElementById('magicEye');
+  const tuningKnob = document.getElementById('tuningKnob');
+
+  let noiseNode = null, noiseGain = null, stationGain = null, stationOsc1 = null, stationOsc2 = null, heterodyneWhistle = null, heterodyneGain = null;
+
+  function initRadioAudio() {
+    const ctx = getAudioContext();
+    const bufferSize = ctx.sampleRate * 2;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+
+    noiseNode = ctx.createBufferSource();
+    noiseNode.buffer = noiseBuffer;
+    noiseNode.loop = true;
+
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 1600;
+    noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.0, ctx.currentTime);
+
+    noiseNode.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noiseNode.start();
+
+    heterodyneWhistle = ctx.createOscillator();
+    heterodyneGain = ctx.createGain();
+    heterodyneWhistle.frequency.setValueAtTime(1000, ctx.currentTime);
+    heterodyneGain.gain.setValueAtTime(0.0, ctx.currentTime);
+    heterodyneWhistle.connect(heterodyneGain);
+    heterodyneGain.connect(ctx.destination);
+    heterodyneWhistle.start();
+
+    stationOsc1 = ctx.createOscillator();
+    stationOsc2 = ctx.createOscillator();
+    stationGain = ctx.createGain();
+    stationGain.gain.setValueAtTime(0.0, ctx.currentTime);
+    stationOsc1.connect(stationGain);
+    stationOsc2.connect(stationGain);
+    stationGain.connect(ctx.destination);
+    stationOsc1.start();
+    stationOsc2.start();
+  }
+
+  function updateRadioAudio() {
+    if (!isRadioOn || !audioCtx) return;
+    const ctx = audioCtx;
+    const stations = [
+      { f: 68.2, name: 'УЗЕЛ СВЯЗИ • ПОЗЫВНЫЕ', tone: 440, type: 'chime' },
+      { f: 94.7, name: '«ЦВЕТОК-9» • НОМЕРНАЯ', tone: 880, type: 'numbers' },
+      { f: 105.1, name: 'МАЧТА №4 • НЕСУЩАЯ', tone: 54, type: 'hum' }
+    ];
+
+    let closestDist = 999;
+    let activeStation = null;
+    stations.forEach(st => {
+      const d = Math.abs(currentFreq - st.f);
+      if (d < closestDist) { closestDist = d; activeStation = st; }
+    });
+
+    if (closestDist < 1.4) {
+      const signalPower = Math.max(0, 1 - (closestDist / 1.4));
+      magicEye.classList.add('active');
+      magicEye.style.opacity = (0.2 + signalPower * 0.8).toFixed(2);
+      noiseGain.gain.setTargetAtTime(0.12 * (1 - signalPower * 0.8), ctx.currentTime, 0.05);
+
+      if (closestDist > 0.08 && closestDist < 0.9) {
+        heterodyneWhistle.frequency.setTargetAtTime(closestDist * 3200, ctx.currentTime, 0.05);
+        heterodyneGain.gain.setTargetAtTime(0.08 * (1 - closestDist), ctx.currentTime, 0.05);
+      } else {
+        heterodyneGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
+      }
+
+      stationGain.gain.setTargetAtTime(0.25 * signalPower, ctx.currentTime, 0.05);
+      if (activeStation.type === 'hum') {
+        stationOsc1.type = 'sawtooth'; stationOsc1.frequency.setTargetAtTime(50, ctx.currentTime, 0.05);
+        stationOsc2.type = 'sine'; stationOsc2.frequency.setTargetAtTime(100, ctx.currentTime, 0.05);
+      } else if (activeStation.type === 'numbers') {
+        stationOsc1.type = 'square'; stationOsc1.frequency.setTargetAtTime(750, ctx.currentTime, 0.05);
+        stationOsc2.type = 'sine'; stationOsc2.frequency.setTargetAtTime(375, ctx.currentTime, 0.05);
+      } else {
+        stationOsc1.type = 'sine'; stationOsc1.frequency.setTargetAtTime(activeStation.tone, ctx.currentTime, 0.05);
+        stationOsc2.type = 'triangle'; stationOsc2.frequency.setTargetAtTime(activeStation.tone * 1.5, ctx.currentTime, 0.05);
+      }
+      freqText.innerText = `${currentFreq.toFixed(1)} МГц [${activeStation.name}]`;
+    } else {
+      magicEye.classList.remove('active');
+      magicEye.style.opacity = '0.15';
+      noiseGain.gain.setTargetAtTime(0.18, ctx.currentTime, 0.05);
+      heterodyneGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
+      stationGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
+      freqText.innerText = `${currentFreq.toFixed(1)} МГц [ЭФИР]`;
+    }
+  }
+
+  function setFrequency(newFreq) {
+    currentFreq = Math.max(minFreq, Math.min(maxFreq, newFreq));
+    const percent = ((currentFreq - minFreq) / (maxFreq - minFreq)) * 100;
+    dialNeedle.style.left = `${percent}%`;
+    updateRadioAudio();
+  }
+
+  powerBtn.addEventListener('click', () => {
+    isRadioOn = !isRadioOn;
+    playStampThud();
+    if (isRadioOn) {
+      powerBtn.classList.add('on');
+      powerBtn.innerText = 'ВЫКЛ';
+      radioDial.classList.add('powered');
+      if (!noiseNode) initRadioAudio();
+      updateRadioAudio();
+    } else {
+      powerBtn.classList.remove('on');
+      powerBtn.innerText = 'ВКЛ';
+      radioDial.classList.remove('powered');
+      magicEye.classList.remove('active');
+      freqText.innerText = 'ПИТАНИЕ ОТКЛЮЧЕНО';
+      if (audioCtx) {
+        noiseGain?.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.05);
+        stationGain?.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.05);
+        heterodyneGain?.gain.setTargetAtTime(0.0, audioCtx.currentTime, 0.05);
+      }
+    }
+  });
+
+  let isDialDragging = false;
+  radioDial.addEventListener('pointerdown', (e) => {
+    isDialDragging = true;
+    const rect = radioDial.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    setFrequency(minFreq + ratio * (maxFreq - minFreq));
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if (!isDialDragging) return;
+    const rect = radioDial.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    setFrequency(minFreq + ratio * (maxFreq - minFreq));
+  });
+
+  window.addEventListener('pointerup', () => { isDialDragging = false; });
+
+  let knobStartX = 0, isKnobDragging = false, knobRot = 0;
+  tuningKnob.addEventListener('pointerdown', (e) => { isKnobDragging = true; knobStartX = e.clientX; });
+  window.addEventListener('pointermove', (e) => {
+    if (!isKnobDragging) return;
+    const dx = e.clientX - knobStartX;
+    knobStartX = e.clientX;
+    knobRot += dx * 4;
+    tuningKnob.style.transform = `rotate(${knobRot}deg)`;
+    setFrequency(currentFreq + dx * 0.12);
+  });
+  window.addEventListener('pointerup', () => { isKnobDragging = false; });
 </script>
 </body>
 </html>
