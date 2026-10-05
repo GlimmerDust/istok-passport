@@ -614,10 +614,10 @@
 
 <script>
   // =======================================================
-  // ПРЯМОЕ ПОДКЛЮЧЕНИЕ К SUPABASE ЧЕРЕЗ FETCH (БЕЗ СБОЕВ)
+  // ПРЯМОЕ ПОДКЛЮЧЕНИЕ К SUPABASE ЧЕРЕЗ FETCH С ПРАВИЛЬНЫМ JWT
   // =======================================================
   const SUPABASE_URL = 'https://mqauywugbbnrgmgsnpce.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_0x7b55RNv2o4KNVs7tgGjg_yWwpd5Qt';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xYXV5d3VnYmJucmdtZ3NucGNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExNTM1NDEsImV4cCI6MjEwNjcyOTU0MX0.a09J71eVaBgpN1HezBSLWTTG5sQ3BcU0R8bJLbCR4Mc';
 
   async function apiSaveResident(payload) {
     try {
@@ -729,11 +729,10 @@
   }
 
   const tgUser = tg?.initDataUnsafe?.user;
-  // Уникальный ID конкретного аккаунта Telegram
   const rawId = tgUser?.id ? String(tgUser.id) : (localStorage.getItem('istok_dev_id') || String(Math.floor(100000 + Math.random() * 900000)));
   if (!tgUser && !localStorage.getItem('istok_dev_id')) localStorage.setItem('istok_dev_id', rawId);
 
-  // ПЕРСОНАЛЬНЫЙ КЛЮЧ: привязан строго к ID текущего аккаунта!
+  // Персональный ключ изоляции хранилища
   const uKey = (key) => `istok_u${rawId}_${key}`;
 
   function syncSet(key, value) {
@@ -810,11 +809,11 @@
   const calculatedSeries = 'ИСТ-' + ((Math.abs(Number(rawId)) % 80) + 15);
   let calculatedNumber = String(Math.abs(Number(rawId)) % 1000000).padStart(6, '0');
 
-  // Если это основной аккаунт коменданта (по номеру 501517 или никнейму)
+  // Проверка прав коменданта (номер 501517 или никнейм @glimmerdust19)
   const ADMIN_NUMBERS = ['501517'];
   const isAdmin = ADMIN_NUMBERS.includes(calculatedNumber) || (tgUser?.username === 'glimmerdust19') || calculatedNumber === '501517';
   if (isAdmin) {
-    calculatedNumber = '501517'; // Фиксируем номер коменданта
+    calculatedNumber = '501517';
     const adminBtn = document.getElementById('adminAppBtn');
     if (adminBtn) adminBtn.style.display = 'flex';
   }
@@ -822,16 +821,13 @@
   document.getElementById('pSeries').innerText = calculatedSeries;
   document.getElementById('pNumber').innerText = calculatedNumber;
 
-  // Загружаем имя строго для этого аккаунта
   syncGet(uKey('name'), (val) => {
-    // Если имя ещё не задано в этом аккаунте, берем имя из Telegram
     const defaultName = tgUser ? (tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '')) : 'Житель посёлка';
     const name = val || defaultName;
     document.getElementById('pName').innerText = name;
     document.getElementById('hudCallsign').innerText = `${name.toUpperCase()} • ${calculatedSeries}`;
   });
 
-  // Загружаем профессию и прописку строго для этого аккаунта
   syncGet(uKey('prof'), (val) => {
     document.getElementById('pProf').innerText = val || 'Радиомеханик узла связи';
   });
@@ -839,7 +835,6 @@
     document.getElementById('pAddress').innerText = val || 'ул. Строителей, д. 12';
   });
 
-  // Загружаем фото строго для этого аккаунта
   const savedAvatar = localStorage.getItem(uKey('avatar'));
   const userPhoto = document.getElementById('userPhoto');
   const photoPlaceholder = document.getElementById('photoPlaceholder');
@@ -891,7 +886,7 @@
   window.addEventListener('pointerup', () => { isDragging = false; });
   window.addEventListener('pointercancel', () => { isDragging = false; });
 
-  // 7. ФОТО ЖИТЕЛЯ (СОХРАНЯЕТСЯ В ПЕРСОНАЛЬНЫЙ КЛЮЧ)
+  // 7. ФОТО ЖИТЕЛЯ
   const photoTrigger = document.getElementById('photoTrigger');
   const fileInput = document.getElementById('fileInput');
 
