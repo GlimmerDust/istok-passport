@@ -79,6 +79,11 @@
       box-shadow: 0 0 8px var(--pda-green);
       animation: ledPulse 3s infinite;
     }
+    .status-led.alert {
+      background: #e63946 !important;
+      box-shadow: 0 0 10px #e63946 !important;
+      animation: ledPulse 0.8s infinite !important;
+    }
     @keyframes ledPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
     .pda-screen {
@@ -151,6 +156,7 @@
       cursor: pointer;
       box-shadow: inset 0 0 10px rgba(0,0,0,0.7);
       transition: all 0.15s;
+      position: relative;
     }
     .pda-app-btn:active {
       background: #1b2e20;
@@ -175,6 +181,20 @@
       text-align: center;
     }
     .admin-btn .pda-app-title { color: #f72585; }
+
+    .badge-unread {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #e63946;
+      color: #fff;
+      font-size: 7px;
+      font-weight: bold;
+      padding: 1px 4px;
+      border-radius: 3px;
+      box-shadow: 0 0 6px #e63946;
+      animation: ledPulse 1.2s infinite;
+    }
 
     .btn-back-pda {
       align-self: flex-start;
@@ -494,7 +514,7 @@
     <span>КПК «ИСТОК-М» v2.7</span>
     <div style="display: flex; align-items: center; gap: 6px;">
       <span>СВЯЗЬ</span>
-      <div class="status-led"></div>
+      <div class="status-led" id="topLed"></div>
     </div>
   </div>
 
@@ -539,6 +559,7 @@
         <div class="pda-app-btn" id="openMsgsApp">
           <div class="pda-app-icon">📟</div>
           <div class="pda-app-title">ДЕПЕШИ ГО/ЧС</div>
+          <span class="badge-unread" id="unreadBadge" style="display: none;">НОВАЯ</span>
         </div>
 
         <!-- ПУЛЬТ КОМЕНДАНТА -->
@@ -771,7 +792,7 @@
       </div>
     </div>
 
-    <!-- ЗАГЛУШКА ДЛЯ КАРТЫ И СНАРЯЖЕНИЯ -->
+    <!-- ЗАГЛУШКА -->
     <div class="pda-view" id="viewStub">
       <button class="btn-back-pda" id="backFromStub">◄ МЕНЮ КПК</button>
       <div class="stub-terminal">
@@ -929,7 +950,7 @@
     return true;
   }
 
-  // --- API ДЕПЕШ ГО/ЧС ---
+  // --- API ДЕПЕШ ГО/ЧС (ЧТЕНИЕ, ЗАПИСЬ, УДАЛЕНИЕ) ---
   async function apiGetDispatches() {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/go_dispatches?select=*&order=created_at.desc&limit=20`, {
@@ -954,6 +975,18 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return true;
+  }
+
+  async function apiDeleteDispatch(id) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/go_dispatches?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return true;
@@ -1161,6 +1194,7 @@
   };
   document.getElementById('openMsgsApp').onclick = () => {
     showView(viewMsgs);
+    markDispatchesAsRead();
     loadDispatches();
   };
   document.getElementById('adminAppBtn').onclick = () => showView(viewAdmin);
@@ -1742,7 +1776,7 @@
   // 13. ДЕПЕШИ ГО/ЧС
   const defaultDispatches = [
     {
-      id: '01',
+      id: 1,
       created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
       level: 'ШТАТНО',
       title: 'ПЛАНОВЫЙ ОСМОТР МАЧТЫ №4',
@@ -1750,7 +1784,7 @@
       body: 'Техперсоналу узла связи: завершить юстировку фидерных линий до 21:00. Наведение несущей частоты 105.1 МГц признано стабильным.'
     },
     {
-      id: '02',
+      id: 2,
       created_at: new Date(Date.now() - 3600000 * 7).toISOString(),
       level: 'ПРЕДПИСАНИЕ',
       title: 'СВЕТОМАСКИРОВКА И ТИШИНА',
@@ -1758,7 +1792,7 @@
       body: 'Всем жителям барачного сектора плотно закрыть оконные ставни после 23:00. Шаги и скрежет со стороны промзоны признаны ложными. Не покидать периметр домов.'
     },
     {
-      id: '03',
+      id: 3,
       created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
       level: 'ТРЕВОГА-4',
       title: 'ДЕФИЦИТ ДАВЛЕНИЯ В КОТЕЛЬНОЙ №3',
@@ -1767,6 +1801,8 @@
     }
   ];
 
+  let latestDispatchId = 0;
+
   async function loadDispatches() {
     const cont = document.getElementById('dispatchContainer');
     cont.innerHTML = '<div style="font-size: 8.5px; color: #72a37d; text-align: center; padding: 12px;">Синхронизация ленты ГО/ЧС...</div>';
@@ -1774,6 +1810,10 @@
     let data = await apiGetDispatches();
     if (!data || data.length === 0) {
       data = defaultDispatches;
+    }
+
+    if (data.length > 0 && typeof data[0].id === 'number') {
+      latestDispatchId = Math.max(...data.map(d => Number(d.id) || 0));
     }
 
     let hasAlarm = data.some(d => d.level === 'ТРЕВОГА-4' || d.level === 'ГРИФ: СМУТА');
@@ -1796,21 +1836,42 @@
       if (d.level === 'ТРЕВОГА-4') { cardClass = 'level-alarm'; stampClass = 'stamp-alarm'; }
       if (d.level === 'ГРИФ: СМУТА') { cardClass = 'level-secret'; stampClass = 'stamp-secret'; }
 
+      const adminDeleteBtn = isAdmin ? `
+        <button class="btn-act" onclick="deleteDispatchItem(${d.id})" style="margin-top: 5px; padding: 3px 6px; font-size: 7.5px; color: #ff5555; border-color: #9e2a2b;">
+          [АННУЛИРОВАТЬ ИЗ ЭФИРА 🗑]
+        </button>
+      ` : '';
+
       return `
-        <div class="dispatch-card ${cardClass}">
+        <div class="dispatch-card ${cardClass}" id="dispatch-${d.id}">
           <div class="dispatch-header-row">
             <span>[ДЕПЕША №${d.id}] • ${formatIstokDate(d.created_at)}</span>
             <span class="dispatch-stamp ${stampClass}">${d.level}</span>
           </div>
           <div style="font-weight: bold; color: #e6e0d2; font-size: 9px; letter-spacing: 0.5px;">${d.title}</div>
           <div class="dispatch-body">${d.body}</div>
-          <div style="font-size: 7.5px; opacity: 0.6; text-align: right;">ИСТОЧНИК: ${d.author}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+            <span style="font-size: 7.5px; opacity: 0.6;">ИСТОЧНИК: ${d.author}</span>
+            ${adminDeleteBtn}
+          </div>
         </div>
       `;
     }).join('');
 
     playTeletypeClick();
   }
+
+  // Удаление депеши (только Комендант)
+  window.deleteDispatchItem = async (id) => {
+    if (!confirm(`Аннулировать депешу №${id} из эфира посёлка?`)) return;
+    try {
+      await apiDeleteDispatch(id);
+      playStampThud();
+      loadDispatches();
+    } catch(e) {
+      alert('Ошибка аннулирования: ' + e.message);
+    }
+  };
 
   document.getElementById('btnRefreshDispatches').onclick = () => {
     playTeletypeClick();
@@ -1845,6 +1906,36 @@
       alert('Ошибка передачи: ' + e.message);
     }
   };
+
+  // Фоновая проверка новых депеш (эфирный сканер SFN)
+  function markDispatchesAsRead() {
+    const badge = document.getElementById('unreadBadge');
+    const topLed = document.getElementById('topLed');
+    if (badge) badge.style.display = 'none';
+    if (topLed) topLed.classList.remove('alert');
+    localStorage.setItem(uKey('last_read_dispatch'), String(latestDispatchId));
+  }
+
+  async function checkDispatchesBackground() {
+    const data = await apiGetDispatches();
+    if (!data || data.length === 0) return;
+
+    const maxId = Math.max(...data.map(d => Number(d.id) || 0));
+    latestDispatchId = maxId;
+
+    const lastRead = Number(localStorage.getItem(uKey('last_read_dispatch')) || '0');
+    const badge = document.getElementById('unreadBadge');
+    const topLed = document.getElementById('topLed');
+
+    if (maxId > lastRead) {
+      if (badge && !viewMsgs.classList.contains('active')) badge.style.display = 'block';
+      if (topLed) topLed.classList.add('alert');
+    }
+  }
+
+  // Сканируем эфир каждые 20 секунд
+  setInterval(checkDispatchesBackground, 20000);
+  checkDispatchesBackground();
 
   // 14. ПУЛЬТ КОМЕНДАНТА
   document.getElementById('adminResetSelfBtn').onclick = () => {
