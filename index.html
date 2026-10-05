@@ -191,7 +191,7 @@
     }
     .btn-back-pda:active { background: #1b3320; color: #4ade80; }
 
-    /* ПАСПОРТ */
+    /* ==================== ПАСПОРТ ==================== */
     .passport-box {
       display: flex;
       flex-direction: column;
@@ -299,7 +299,7 @@
     }
     .btn-act.btn-unlock:active { background: #3b1b42; color: #f72585; }
 
-    /* РАДИО */
+    /* ==================== РАДИО ==================== */
     .radio-unit {
       background: #14110f; border: 2px solid #2d2420; border-radius: 12px;
       padding: 10px; margin-top: 4px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
@@ -330,7 +330,7 @@
     .knob { width: 55px; height: 55px; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #3a2e26 0%, #161210 80%); border: 2px solid #4a3c33; position: relative; cursor: ew-resize; }
     .knob-marker { position: absolute; top: 4px; left: calc(50% - 2px); width: 4px; height: 11px; background: #d4a373; }
 
-    /* ДИСПЕТЧЕР ЖЭК */
+    /* ==================== ДИСПЕТЧЕР ЖЭК ==================== */
     .zhek-nav {
       display: flex; gap: 4px; margin-bottom: 8px; border-bottom: 1px solid #233b2a; padding-bottom: 6px;
     }
@@ -389,7 +389,44 @@
     .gauge-fill { height: 100%; width: 45%; background: #38b000; transition: width 0.2s, background 0.2s; }
     .gauge-target { position: absolute; top: 0; bottom: 0; left: 70%; width: 20%; background: rgba(255, 255, 255, 0.25); border: 1px dashed #fff; pointer-events: none; }
 
-    /* ПУЛЬТ КОМЕНДАНТА */
+    /* ==================== ДЕПЕШИ ГО/ЧС ==================== */
+    .alert-banner {
+      background: #141f17; border: 1px solid #2f5438; border-radius: 6px;
+      padding: 6px 8px; display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+    .alert-indicator { display: flex; align-items: center; gap: 6px; font-size: 8.5px; font-weight: bold; }
+    .alert-dot { width: 8px; height: 8px; border-radius: 50%; background: #38b000; box-shadow: 0 0 6px #38b000; }
+    .alert-dot.alarm { background: #e63946; box-shadow: 0 0 8px #e63946; animation: ledPulse 1s infinite; }
+
+    .dispatch-feed { display: flex; flex-direction: column; gap: 7px; flex: 1; overflow-y: auto; }
+    .dispatch-card {
+      background: #0d120f; border: 1px solid #1f2f24; border-radius: 6px;
+      padding: 8px; display: flex; flex-direction: column; gap: 4px;
+      font-size: 9px; line-height: 1.45; position: relative;
+    }
+    .dispatch-card.level-alarm { border-color: #9e2a2b; background: #1c0e0e; }
+    .dispatch-card.level-secret { border-color: #7209b7; background: #190918; }
+    .dispatch-card.level-notice { border-color: #b08968; background: #17120e; }
+
+    .dispatch-header-row {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px dashed #2a3d30; padding-bottom: 4px; font-size: 8px;
+    }
+    .dispatch-stamp {
+      font-weight: bold; padding: 1px 4px; border-radius: 3px; font-size: 7.5px;
+    }
+    .stamp-normal { background: #14281a; color: #52b788; border: 1px solid #2d6a4f; }
+    .stamp-notice { background: #362414; color: #ffb703; border: 1px solid #b26a00; }
+    .stamp-alarm { background: #3f1013; color: #ff4d6d; border: 1px solid #c9184a; }
+    .stamp-secret { background: #2f0d2c; color: #f72585; border: 1px solid #7209b7; }
+
+    .dispatch-body {
+      background: rgba(0,0,0,0.35); padding: 5px 6px; border-radius: 4px;
+      color: #b5cebc; font-size: 8.5px; white-space: pre-line;
+    }
+
+    /* ==================== ПУЛЬТ КОМЕНДАНТА ==================== */
     .admin-panel {
       flex: 1; display: flex; flex-direction: column; gap: 8px; color: #e0aaff; font-size: 10px;
     }
@@ -425,7 +462,7 @@
       color: #62876b; font-size: 10.5px; line-height: 1.5;
     }
 
-    /* МОДАЛКА */
+    /* МОДАЛКИ */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
       align-items: center; justify-content: center; z-index: 100; padding: 16px;
@@ -499,7 +536,7 @@
           <div class="pda-app-title">СНАРЯЖЕНИЕ</div>
         </div>
 
-        <div class="pda-app-btn" id="btnStubMsgs">
+        <div class="pda-app-btn" id="openMsgsApp">
           <div class="pda-app-icon">📟</div>
           <div class="pda-app-title">ДЕПЕШИ ГО/ЧС</div>
         </div>
@@ -635,7 +672,6 @@
         <button class="zhek-tab-btn" id="tabBtnQuest">СЛУЖЕБНЫЙ НАРЯД</button>
       </div>
 
-      <!-- Вкладка 1: Журнал заявок -->
       <div class="zhek-tab-panel active" id="panelZhekList">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span style="font-size: 8.5px; color: #72a37d;">СВОДКА ПОСЁЛКА:</span>
@@ -646,7 +682,6 @@
         </div>
       </div>
 
-      <!-- Вкладка 2: Форма подачи -->
       <div class="zhek-tab-panel" id="panelZhekCreate">
         <div class="form-group">
           <label>АДРЕС ИНЦИДЕНТА:</label>
@@ -680,15 +715,12 @@
         </button>
       </div>
 
-      <!-- Вкладка 3: Служебный наряд -->
       <div class="zhek-tab-panel" id="panelZhekQuest">
         <div class="quest-box" id="questBoxContainer">
           <div class="quest-title" id="questTitle">НАРЯД НА СМЕНУ</div>
           <div class="quest-desc" id="questDesc">Определение профильного поручения по картотеке...</div>
           
-          <div class="quest-interactive" id="questInteractiveArea">
-            <!-- Интерактивная зона наряда -->
-          </div>
+          <div class="quest-interactive" id="questInteractiveArea"></div>
 
           <button class="btn-act" id="btnCompleteQuest" style="padding: 7px; font-weight: bold; width: 100%;">
             Сдать рапорт о смене
@@ -697,7 +729,49 @@
       </div>
     </div>
 
-    <!-- ЗАГЛУШКА -->
+    <!-- ДЕПЕШИ ГО/ЧС -->
+    <div class="pda-view" id="viewMsgs">
+      <button class="btn-back-pda" id="backFromMsgs">◄ МЕНЮ КПК</button>
+      <div class="menu-header">ШТАБ ГО/ЧС • СВОДКИ И ДИРЕКТИВЫ</div>
+
+      <!-- ИНДИКАТОР ОБСТАНОВКИ -->
+      <div class="alert-banner">
+        <div class="alert-indicator">
+          <div class="alert-dot" id="alertLed"></div>
+          <span id="alertStatusText">КОНТУР СТАБИЛЕН • УГРОЗ НЕТ</span>
+        </div>
+        <span style="font-size: 7.5px; color: #6b9376;">ЭФИР: СЕТЬ-4</span>
+      </div>
+
+      <!-- ПАНЕЛЬ КОМЕНДАНТА: ВЫПУСК ДЕПЕШИ -->
+      <div id="adminDispatchPanel" style="display: none; background: #190918; border: 1px solid #7209b7; border-radius: 6px; padding: 8px; margin-bottom: 8px;">
+        <div style="font-size: 8.5px; font-weight: bold; color: #f72585; margin-bottom: 4px;">ПЕРЕДАТЬ ДЕПЕШУ В ЭФИР [ДОПУСК-1]</div>
+        <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+          <select id="newDispatchLevel" style="background: #000; color: #fff; font-family: inherit; font-size: 8.5px; padding: 4px; border: 1px solid #7209b7; flex: 1;">
+            <option value="ПРЕДПИСАНИЕ">ПРЕДПИСАНИЕ</option>
+            <option value="ШТАТНО">ШТАТНО</option>
+            <option value="ТРЕВОГА-4">ТРЕВОГА-4</option>
+            <option value="ГРИФ: СМУТА">ГРИФ: СМУТА</option>
+          </select>
+          <input type="text" id="newDispatchTitle" placeholder="Тема депеши..." style="background: #000; color: #fff; font-family: inherit; font-size: 8.5px; padding: 4px; border: 1px solid #7209b7; flex: 2;">
+        </div>
+        <textarea id="newDispatchBody" rows="2" placeholder="Текст экстренного циркуляра штаба..." style="width: 100%; background: #000; color: #fff; font-family: inherit; font-size: 8.5px; padding: 4px; border: 1px solid #7209b7;"></textarea>
+        <button class="btn-act" id="btnPublishDispatch" style="width: 100%; margin-top: 4px; background: #480ca8; border-color: #7209b7; color: #fff; font-size: 8.5px; font-weight: bold;">
+          Транслировать по сети вещания
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <span style="font-size: 8px; color: #72a37d;">АРХИВ ЦИРКУЛЯРОВ:</span>
+        <button class="btn-act" id="btnRefreshDispatches" style="padding: 2px 6px; font-size: 7.5px;">🔄 Запрос эфира</button>
+      </div>
+
+      <div class="dispatch-feed" id="dispatchContainer">
+        <div style="font-size: 8.5px; color: #555; text-align: center; padding: 12px;">Синхронизация ленты ГО/ЧС...</div>
+      </div>
+    </div>
+
+    <!-- ЗАГЛУШКА ДЛЯ КАРТЫ И СНАРЯЖЕНИЯ -->
     <div class="pda-view" id="viewStub">
       <button class="btn-back-pda" id="backFromStub">◄ МЕНЮ КПК</button>
       <div class="stub-terminal">
@@ -756,7 +830,7 @@
   </div>
 </div>
 
-<!-- МОДАЛКА РЕЗОЛЮЦИИ КОМЕНДАНТА ЖЭК -->
+<!-- МОДАЛКА РЕЗОЛЮЦИИ ДИСПЕТЧЕРА ЖЭК -->
 <div class="modal-backdrop" id="modalResolutionBackdrop">
   <div class="modal-box" style="background: #190918; border-color: #7209b7; color: #e0aaff;">
     <strong style="color: #f72585;">РЕЗОЛЮЦИЯ ДИСПЕТЧЕРА [ДОПУСК-1]</strong>
@@ -815,7 +889,7 @@
     return await res.json();
   }
 
-  // --- API ДИСПЕТЧЕРА ЖЭК ---
+  // --- API ЖЭК ---
   async function apiGetZhekTickets() {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/zhek_tickets?select=*&order=created_at.desc&limit=30`, {
       headers: {
@@ -850,6 +924,36 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ status: status, official_reply: reply })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return true;
+  }
+
+  // --- API ДЕПЕШ ГО/ЧС ---
+  async function apiGetDispatches() {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/go_dispatches?select=*&order=created_at.desc&limit=20`, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch(e) {
+      return null;
+    }
+  }
+
+  async function apiCreateDispatch(payload) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/go_dispatches`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return true;
@@ -929,6 +1033,23 @@
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.13);
+    } catch(e) {}
+  }
+
+  function playTeletypeClick() {
+    try {
+      const ctx = getAudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(400, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.03);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.03);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.04);
     } catch(e) {}
   }
 
@@ -1019,12 +1140,13 @@
   const viewPassport = document.getElementById('viewPassport');
   const viewRadio = document.getElementById('viewRadio');
   const viewZhek = document.getElementById('viewZhek');
+  const viewMsgs = document.getElementById('viewMsgs');
   const viewStub = document.getElementById('viewStub');
   const viewAdmin = document.getElementById('viewAdmin');
 
   function showView(view) {
     playPdaBeep();
-    [viewMenu, viewPassport, viewRadio, viewZhek, viewStub, viewAdmin].forEach(v => {
+    [viewMenu, viewPassport, viewRadio, viewZhek, viewMsgs, viewStub, viewAdmin].forEach(v => {
       if (v) v.classList.remove('active');
     });
     if (view) view.classList.add('active');
@@ -1037,10 +1159,15 @@
     loadZhekTickets();
     setupProfessionQuest();
   };
+  document.getElementById('openMsgsApp').onclick = () => {
+    showView(viewMsgs);
+    loadDispatches();
+  };
   document.getElementById('adminAppBtn').onclick = () => showView(viewAdmin);
   document.getElementById('backFromPassport').onclick = () => showView(viewMenu);
   document.getElementById('backFromRadio').onclick = () => showView(viewMenu);
   document.getElementById('backFromZhek').onclick = () => showView(viewMenu);
+  document.getElementById('backFromMsgs').onclick = () => showView(viewMenu);
   document.getElementById('backFromStub').onclick = () => showView(viewMenu);
   document.getElementById('backFromAdmin').onclick = () => showView(viewMenu);
 
@@ -1051,7 +1178,6 @@
   }
   document.getElementById('btnStubMap').onclick = () => openStub('КАРТА СЕКТОРА', 'Спутниковая развёртка недоступна. Радиомачта №4 подавляет сторонние сигналы. Ориентируйтесь по визуальным ориентирам посёлка.');
   document.getElementById('btnStubInv').onclick = () => openStub('СНАРЯЖЕНИЕ', 'Личные карманы гражданина. Талоны на керосин, ключи от подвалов и памятки учёта.');
-  document.getElementById('btnStubMsgs').onclick = () => openStub('ДЕПЕШИ ГО/ЧС', 'Архив сводок комендатуры. Пломба №4 удерживает контур. Покидать жилой сектор после 23:00 запрещено.');
 
   // 5. РАСЧЁТ ДАННЫХ ПЕРСОНАЖА ДЛЯ ТЕКУЩЕГО АККАУНТА
   const calculatedSeries = 'ИСТ-' + ((Math.abs(Number(rawId)) % 80) + 15);
@@ -1063,6 +1189,8 @@
     calculatedNumber = '501517';
     const adminBtn = document.getElementById('adminAppBtn');
     if (adminBtn) adminBtn.style.display = 'flex';
+    const adminDisp = document.getElementById('adminDispatchPanel');
+    if (adminDisp) adminDisp.style.display = 'block';
   }
 
   document.getElementById('pSeries').innerText = calculatedSeries;
@@ -1097,17 +1225,13 @@
   // 6. ТРЕХМЕРНОЕ ВРАЩЕНИЕ ПАСПОРТА
   const card = document.getElementById('card');
   const scene = document.getElementById('sceneContainer');
-  let isDraggingCard = false;
-  let hasDragged = false;
-  let startX = 0, startY = 0;
-  let currentRotX = 0, currentRotY = 0;
+  let isDraggingCard = false, hasDragged = false;
+  let startX = 0, startY = 0, currentRotX = 0, currentRotY = 0;
 
   if (scene && card) {
     scene.onpointerdown = (e) => {
-      isDraggingCard = true;
-      hasDragged = false;
-      startX = e.clientX;
-      startY = e.clientY;
+      isDraggingCard = true; hasDragged = false;
+      startX = e.clientX; startY = e.clientY;
     };
 
     window.addEventListener('pointermove', (e) => {
@@ -1118,8 +1242,7 @@
       currentRotY += dx * 0.7;
       currentRotX = Math.max(-45, Math.min(45, currentRotX - dy * 0.7));
       card.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
-      startX = e.clientX;
-      startY = e.clientY;
+      startX = e.clientX; startY = e.clientY;
     });
 
     window.addEventListener('pointerup', () => { isDraggingCard = false; });
@@ -1362,7 +1485,7 @@
     playStampThud();
   };
 
-  // 12. ДИСПЕТЧЕР ЖЭК (ВКЛАДКИ, ЛОГИКА, КВЕСТЫ)
+  // 12. ДИСПЕТЧЕР ЖЭК
   const tabBtnList = document.getElementById('tabBtnList');
   const tabBtnCreate = document.getElementById('tabBtnCreate');
   const tabBtnQuest = document.getElementById('tabBtnQuest');
@@ -1430,7 +1553,6 @@
     loadZhekTickets();
   };
 
-  // Подача жалобы
   document.getElementById('btnSubmitTicket').onclick = async () => {
     const desc = document.getElementById('ticketDesc').value.trim();
     if (!desc || desc.length < 5) {
@@ -1462,7 +1584,6 @@
     }
   };
 
-  // Модалка резолюции для коменданта
   const resModal = document.getElementById('modalResolutionBackdrop');
   window.openResolutionModal = (id, currentStatus) => {
     document.getElementById('resTicketId').value = id;
@@ -1488,7 +1609,7 @@
     }
   };
 
-  // --- СЛУЖЕБНЫЙ НАРЯД (ИНТЕРАКТИВНЫЕ КВЕСТЫ) ---
+  // Служебные наряды
   let questState = { active: false, success: false, data: {} };
 
   function setupProfessionQuest() {
@@ -1618,7 +1739,114 @@
     };
   }
 
-  // 13. ПУЛЬТ КОМЕНДАНТА
+  // 13. ДЕПЕШИ ГО/ЧС
+  const defaultDispatches = [
+    {
+      id: '01',
+      created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+      level: 'ШТАТНО',
+      title: 'ПЛАНОВЫЙ ОСМОТР МАЧТЫ №4',
+      author: 'ШТАБ ГО/ЧС',
+      body: 'Техперсоналу узла связи: завершить юстировку фидерных линий до 21:00. Наведение несущей частоты 105.1 МГц признано стабильным.'
+    },
+    {
+      id: '02',
+      created_at: new Date(Date.now() - 3600000 * 7).toISOString(),
+      level: 'ПРЕДПИСАНИЕ',
+      title: 'СВЕТОМАСКИРОВКА И ТИШИНА',
+      author: 'КОМЕНДАТУРА',
+      body: 'Всем жителям барачного сектора плотно закрыть оконные ставни после 23:00. Шаги и скрежет со стороны промзоны признаны ложными. Не покидать периметр домов.'
+    },
+    {
+      id: '03',
+      created_at: new Date(Date.now() - 3600000 * 18).toISOString(),
+      level: 'ТРЕВОГА-4',
+      title: 'ДЕФИЦИТ ДАВЛЕНИЯ В КОТЕЛЬНОЙ №3',
+      author: 'ДИСПЕТЧЕР ЖЭК',
+      body: 'Внимание жителям ул. Речной: пар подается с перебоями. Не вскрывать распределительные люки и колодцы самостоятельно.'
+    }
+  ];
+
+  async function loadDispatches() {
+    const cont = document.getElementById('dispatchContainer');
+    cont.innerHTML = '<div style="font-size: 8.5px; color: #72a37d; text-align: center; padding: 12px;">Синхронизация ленты ГО/ЧС...</div>';
+
+    let data = await apiGetDispatches();
+    if (!data || data.length === 0) {
+      data = defaultDispatches;
+    }
+
+    let hasAlarm = data.some(d => d.level === 'ТРЕВОГА-4' || d.level === 'ГРИФ: СМУТА');
+    const led = document.getElementById('alertLed');
+    const statusTxt = document.getElementById('alertStatusText');
+    if (hasAlarm) {
+      led.classList.add('alarm');
+      statusTxt.innerText = 'ВНИМАНИЕ • ОСОБЫЙ РЕЖИМ СЕКТОРА';
+      statusTxt.style.color = '#ff4d6d';
+    } else {
+      led.classList.remove('alarm');
+      statusTxt.innerText = 'КОНТУР СТАБИЛЕН • УГРОЗ НЕТ';
+      statusTxt.style.color = '#72a37d';
+    }
+
+    cont.innerHTML = data.map(d => {
+      let cardClass = '';
+      let stampClass = 'stamp-normal';
+      if (d.level === 'ПРЕДПИСАНИЕ') { cardClass = 'level-notice'; stampClass = 'stamp-notice'; }
+      if (d.level === 'ТРЕВОГА-4') { cardClass = 'level-alarm'; stampClass = 'stamp-alarm'; }
+      if (d.level === 'ГРИФ: СМУТА') { cardClass = 'level-secret'; stampClass = 'stamp-secret'; }
+
+      return `
+        <div class="dispatch-card ${cardClass}">
+          <div class="dispatch-header-row">
+            <span>[ДЕПЕША №${d.id}] • ${formatIstokDate(d.created_at)}</span>
+            <span class="dispatch-stamp ${stampClass}">${d.level}</span>
+          </div>
+          <div style="font-weight: bold; color: #e6e0d2; font-size: 9px; letter-spacing: 0.5px;">${d.title}</div>
+          <div class="dispatch-body">${d.body}</div>
+          <div style="font-size: 7.5px; opacity: 0.6; text-align: right;">ИСТОЧНИК: ${d.author}</div>
+        </div>
+      `;
+    }).join('');
+
+    playTeletypeClick();
+  }
+
+  document.getElementById('btnRefreshDispatches').onclick = () => {
+    playTeletypeClick();
+    loadDispatches();
+  };
+
+  // Публикация депеши комендантом
+  document.getElementById('btnPublishDispatch').onclick = async () => {
+    const title = document.getElementById('newDispatchTitle').value.trim();
+    const body = document.getElementById('newDispatchBody').value.trim();
+    const level = document.getElementById('newDispatchLevel').value;
+
+    if (!title || !body) {
+      alert('Заполните тему и текст депеши.');
+      return;
+    }
+
+    try {
+      await apiCreateDispatch({
+        level: level,
+        title: title,
+        body: body,
+        author: 'КОМЕНДАТУРА (ДОПУСК-1)'
+      });
+
+      playStampThud();
+      alert('ДЕПЕША ПЕРЕДАНА В СЕТКУ ВЕЩАНИЯ ГО/ЧС ✅');
+      document.getElementById('newDispatchTitle').value = '';
+      document.getElementById('newDispatchBody').value = '';
+      loadDispatches();
+    } catch(e) {
+      alert('Ошибка передачи: ' + e.message);
+    }
+  };
+
+  // 14. ПУЛЬТ КОМЕНДАНТА
   document.getElementById('adminResetSelfBtn').onclick = () => {
     syncSet(uKey('name_locked'), 'false');
     syncSet(uKey('prof_locked'), 'false');
@@ -1694,7 +1922,7 @@
     }
   };
 
-  // 14. ЭКСПОРТ В ФОТО
+  // 15. ЭКСПОРТ В ФОТО
   document.getElementById('exportBtn').onclick = () => {
     const normalizedY = ((currentRotY % 360) + 360) % 360;
     const isBackFacing = normalizedY > 90 && normalizedY < 270;
@@ -1720,7 +1948,7 @@
     });
   };
 
-  // 15. РАДИОСКАНЕР
+  // 16. РАДИОСКАНЕР
   let isRadioOn = false;
   let currentFreq = 64.0;
   const minFreq = 64.0, maxFreq = 108.0;
