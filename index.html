@@ -191,7 +191,7 @@
     }
     .btn-back-pda:active { background: #1b3320; color: #4ade80; }
 
-    /* ==================== ПАСПОРТ ==================== */
+    /* ПАСПОРТ */
     .passport-box {
       display: flex;
       flex-direction: column;
@@ -299,7 +299,7 @@
     }
     .btn-act.btn-unlock:active { background: #3b1b42; color: #f72585; }
 
-    /* ==================== РАДИО ==================== */
+    /* РАДИО */
     .radio-unit {
       background: #14110f; border: 2px solid #2d2420; border-radius: 12px;
       padding: 10px; margin-top: 4px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
@@ -330,13 +330,66 @@
     .knob { width: 55px; height: 55px; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #3a2e26 0%, #161210 80%); border: 2px solid #4a3c33; position: relative; cursor: ew-resize; }
     .knob-marker { position: absolute; top: 4px; left: calc(50% - 2px); width: 4px; height: 11px; background: #d4a373; }
 
-    .stub-terminal {
-      flex: 1; border: 1px dashed #233b2a; border-radius: 8px; padding: 12px;
-      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-      color: #62876b; font-size: 10.5px; line-height: 1.5;
+    /* ДИСПЕТЧЕР ЖЭК */
+    .zhek-nav {
+      display: flex; gap: 4px; margin-bottom: 8px; border-bottom: 1px solid #233b2a; padding-bottom: 6px;
+    }
+    .zhek-tab-btn {
+      flex: 1; background: #101c13; color: #72a37d; border: 1px solid #233e29;
+      padding: 6px 2px; font-size: 8px; font-family: inherit; font-weight: bold;
+      border-radius: 4px; cursor: pointer; text-align: center;
+    }
+    .zhek-tab-btn.active {
+      background: #1f3825; color: #4ade80; border-color: #4ade80;
+    }
+    .zhek-tab-panel { display: none; flex-direction: column; flex: 1; overflow-y: auto; gap: 8px; }
+    .zhek-tab-panel.active { display: flex; }
+
+    .ticket-card {
+      background: #0d140f; border: 1px solid #203626; border-radius: 6px; padding: 8px;
+      font-size: 9px; line-height: 1.4; color: #9bbca1; display: flex; flex-direction: column; gap: 4px;
+    }
+    .ticket-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #1a2f20; padding-bottom: 4px; }
+    .ticket-num { color: #d4a373; font-weight: bold; }
+    .ticket-badge {
+      font-size: 7.5px; padding: 1px 4px; border-radius: 3px; font-weight: bold; text-transform: uppercase;
+    }
+    .badge-open { background: #3b2812; color: #ffb703; border: 1px solid #b26a00; }
+    .badge-work { background: #132a38; color: #4cc9f0; border: 1px solid #0077b6; }
+    .badge-done { background: #13331b; color: #52b788; border: 1px solid #2d6a4f; }
+    .badge-secret { background: #2b0b1e; color: #f72585; border: 1px solid #7209b7; }
+    
+    .ticket-resolution {
+      background: #060a08; border-left: 2px solid #4ade80; padding: 4px 6px; margin-top: 4px;
+      color: #e0aaff; font-size: 8.5px;
     }
 
-    /* ==================== ПУЛЬТ КОМЕНДАНТА ==================== */
+    .form-group { display: flex; flex-direction: column; gap: 3px; }
+    .form-group label { font-size: 8.5px; color: #72a37d; font-weight: bold; }
+    .form-group input, .form-group select, .form-group textarea {
+      background: #09100b; border: 1px solid #233e29; color: #cbe3d0; padding: 6px;
+      font-family: inherit; font-size: 9.5px; border-radius: 4px;
+    }
+
+    /* СЛУЖЕБНЫЙ НАРЯД */
+    .quest-box {
+      background: #0e1711; border: 1px solid #23422b; border-radius: 8px; padding: 10px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .quest-title { color: #4ade80; font-size: 11px; font-weight: bold; border-bottom: 1px solid #1f3825; padding-bottom: 4px; }
+    .quest-desc { font-size: 9.5px; color: #a2c2a8; line-height: 1.4; }
+    .quest-interactive {
+      background: #080d0a; border: 1px dashed #284c31; border-radius: 6px; padding: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    }
+    .quest-gauge {
+      width: 100%; height: 16px; background: #131c15; border-radius: 8px; overflow: hidden;
+      position: relative; border: 1px solid #2b4a33;
+    }
+    .gauge-fill { height: 100%; width: 45%; background: #38b000; transition: width 0.2s, background 0.2s; }
+    .gauge-target { position: absolute; top: 0; bottom: 0; left: 70%; width: 20%; background: rgba(255, 255, 255, 0.25); border: 1px dashed #fff; pointer-events: none; }
+
+    /* ПУЛЬТ КОМЕНДАНТА */
     .admin-panel {
       flex: 1; display: flex; flex-direction: column; gap: 8px; color: #e0aaff; font-size: 10px;
     }
@@ -365,13 +418,20 @@
       border-bottom: 1px dashed #44173e; padding-bottom: 4px; margin-bottom: 4px;
     }
 
+    /* ЗАГЛУШКА */
+    .stub-terminal {
+      flex: 1; border: 1px dashed #233b2a; border-radius: 8px; padding: 12px;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+      color: #62876b; font-size: 10.5px; line-height: 1.5;
+    }
+
     /* МОДАЛКА */
     .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none;
       align-items: center; justify-content: center; z-index: 100; padding: 16px;
     }
     .modal-box { background: #e6e0d2; border: 2px solid #333; padding: 16px; width: 100%; max-width: 280px; border-radius: 8px; font-size: 11px; color: #222; }
-    .modal-box input, .modal-box select { width: 100%; padding: 8px; margin: 8px 0 10px 0; font-family: inherit; border: 1px solid #444; background: #f7f5ef; font-size: 11px; }
+    .modal-box input, .modal-box select, .modal-box textarea { width: 100%; padding: 8px; margin: 8px 0 10px 0; font-family: inherit; border: 1px solid #444; background: #f7f5ef; font-size: 11px; }
     .modal-box button { width: 100%; padding: 8px; background: #2b3a67; color: #fff; border: none; cursor: pointer; font-family: inherit; font-weight: bold; }
     .unlock-link { font-size: 9px; color: #2b3a67; text-decoration: underline; cursor: pointer; display: inline-block; margin-top: 8px; }
 
@@ -429,7 +489,7 @@
           <div class="pda-app-title">КАРТА СЕКТОРА</div>
         </div>
 
-        <div class="pda-app-btn" id="btnStubZhek">
+        <div class="pda-app-btn" id="openZhekApp">
           <div class="pda-app-icon">🏢</div>
           <div class="pda-app-title">ДИСПЕТЧЕР ЖЭК</div>
         </div>
@@ -564,6 +624,79 @@
       </div>
     </div>
 
+    <!-- ДИСПЕТЧЕР ЖЭК -->
+    <div class="pda-view" id="viewZhek">
+      <button class="btn-back-pda" id="backFromZhek">◄ МЕНЮ КПК</button>
+      <div class="menu-header">ЖЭК №1 • ДИСПЕТЧЕРСКИЙ ПУЛЬТ</div>
+
+      <div class="zhek-nav">
+        <button class="zhek-tab-btn active" id="tabBtnList">ЖУРНАЛ ЗАЯВОК</button>
+        <button class="zhek-tab-btn" id="tabBtnCreate">ПОДАТЬ ЖАЛОБУ</button>
+        <button class="zhek-tab-btn" id="tabBtnQuest">СЛУЖЕБНЫЙ НАРЯД</button>
+      </div>
+
+      <!-- Вкладка 1: Журнал заявок -->
+      <div class="zhek-tab-panel active" id="panelZhekList">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 8.5px; color: #72a37d;">СВОДКА ПОСЁЛКА:</span>
+          <button class="btn-act" id="btnRefreshTickets" style="padding: 3px 6px; font-size: 8px;">🔄 Обновить</button>
+        </div>
+        <div id="ticketsContainer" style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 9px; color: #666; text-align: center; padding: 10px;">Загрузка журнала ЖЭК...</div>
+        </div>
+      </div>
+
+      <!-- Вкладка 2: Форма подачи -->
+      <div class="zhek-tab-panel" id="panelZhekCreate">
+        <div class="form-group">
+          <label>АДРЕС ИНЦИДЕНТА:</label>
+          <select id="ticketAddress">
+            <option value="ул. Строителей, д. 12">ул. Строителей, д. 12</option>
+            <option value="ул. Строителей, д. 4">ул. Строителей, д. 4</option>
+            <option value="ул. Речная, д. 7">ул. Речная, д. 7</option>
+            <option value="пер. Связистов, д. 2">пер. Связистов, д. 2</option>
+            <option value="Барачный сектор, дом 5">Барачный сектор, дом 5</option>
+            <option value="ул. Заводская, д. 18">ул. Заводская, д. 18</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>КАТЕГОРИЯ ПРОИСШЕСТВИЯ:</label>
+          <select id="ticketCategory">
+            <option value="Электросеть">Электросеть (мерцание, гул щитка)</option>
+            <option value="Шум/Вибрация">Посторонний шум (стук в вентиляции)</option>
+            <option value="Отопление/Вода">Водопровод (чёрная вода, пар)</option>
+            <option value="Контур безопасности">Контур (сорвана пломба, тени)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>ОПИСАНИЕ СИТУАЦИИ:</label>
+          <textarea id="ticketDesc" rows="4" placeholder="Опишите факт происшествия подробно без паники..."></textarea>
+        </div>
+
+        <button class="btn-act" id="btnSubmitTicket" style="margin-top: 4px; padding: 8px; font-weight: bold; background: #192e1e; color: #4ade80;">
+          Зарегистрировать в ЖЭК №1
+        </button>
+      </div>
+
+      <!-- Вкладка 3: Служебный наряд -->
+      <div class="zhek-tab-panel" id="panelZhekQuest">
+        <div class="quest-box" id="questBoxContainer">
+          <div class="quest-title" id="questTitle">НАРЯД НА СМЕНУ</div>
+          <div class="quest-desc" id="questDesc">Определение профильного поручения по картотеке...</div>
+          
+          <div class="quest-interactive" id="questInteractiveArea">
+            <!-- Интерактивная зона наряда -->
+          </div>
+
+          <button class="btn-act" id="btnCompleteQuest" style="padding: 7px; font-weight: bold; width: 100%;">
+            Сдать рапорт о смене
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ЗАГЛУШКА -->
     <div class="pda-view" id="viewStub">
       <button class="btn-back-pda" id="backFromStub">◄ МЕНЮ КПК</button>
@@ -609,7 +742,7 @@
 
 <input type="file" id="fileInput" accept="image/*" style="display: none;">
 
-<!-- МОДАЛКА ВВОДА ДАННЫХ -->
+<!-- МОДАЛКА ВВОДА ДАННЫХ ПАСПОРТА -->
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal-box">
     <strong id="modalTitle">Регистрация в картотеке</strong>
@@ -620,6 +753,30 @@
     <div style="text-align: center;">
       <span class="unlock-link" id="enterCodeLink">Есть служебный код разблокировки?</span>
     </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА РЕЗОЛЮЦИИ КОМЕНДАНТА ЖЭК -->
+<div class="modal-backdrop" id="modalResolutionBackdrop">
+  <div class="modal-box" style="background: #190918; border-color: #7209b7; color: #e0aaff;">
+    <strong style="color: #f72585;">РЕЗОЛЮЦИЯ ДИСПЕТЧЕРА [ДОПУСК-1]</strong>
+    <p style="font-size: 9px; color: #aaa; margin: 5px 0;">Установите статус обращения и официальный ответ:</p>
+    
+    <input type="hidden" id="resTicketId">
+    
+    <label style="font-size: 8.5px;">СТАТУС ОБРАЩЕНИЯ:</label>
+    <select id="resStatusSelect" style="background: #0d040c; color: #fff; border-color: #7209b7;">
+      <option value="В РАБОТЕ">В РАБОТЕ (Направлен дежурный)</option>
+      <option value="ИСПОЛНЕНО">ИСПОЛНЕНО (Нарушение устранено)</option>
+      <option value="ЛОЖНАЯ ТРЕВОГА">ЛОЖНАЯ ТРЕВОГА (Факты не подтверждены)</option>
+      <option value="ЗАСЕКРЕЧЕНО">ЗАСЕКРЕЧЕНО (Передано в Бюро)</option>
+    </select>
+
+    <label style="font-size: 8.5px;">КАЗЁННАЯ РЕЗОЛЮЦИЯ:</label>
+    <textarea id="resText" rows="3" style="width: 100%; background: #0d040c; color: #fff; border: 1px solid #7209b7; font-family: inherit; font-size: 9.5px; padding: 4px; margin: 5px 0;" placeholder="Официальный ответ комендатуры жителю..."></textarea>
+    
+    <button id="btnSaveResolution" style="background: #480ca8; border: 1px solid #7209b7; margin-top: 4px;">Утвердить резолюцию</button>
+    <button id="btnCloseResolution" style="background: transparent; color: #888; border: none; margin-top: 4px;">Отмена</button>
   </div>
 </div>
 
@@ -656,6 +813,46 @@
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
+  }
+
+  // --- API ДИСПЕТЧЕРА ЖЭК ---
+  async function apiGetZhekTickets() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/zhek_tickets?select=*&order=created_at.desc&limit=30`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  async function apiCreateZhekTicket(payload) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/zhek_tickets`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return true;
+  }
+
+  async function apiUpdateZhekTicket(ticketId, status, reply) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/zhek_tickets?id=eq.${ticketId}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: status, official_reply: reply })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return true;
   }
 
   // =======================================================
@@ -806,16 +1003,28 @@
   setInterval(updateIstokClock, 1000);
   updateIstokClock();
 
+  function formatIstokDate(dateStr) {
+    try {
+      const d = new Date(dateStr);
+      const utcTime = d.getTime() + (d.getTimezoneOffset() * 60000);
+      const istok = new Date(utcTime + (3600000 * 9));
+      return `${String(istok.getDate()).padStart(2, '0')}.${String(istok.getMonth() + 1).padStart(2, '0')} ${String(istok.getHours()).padStart(2, '0')}:${String(istok.getMinutes()).padStart(2, '0')}`;
+    } catch(e) {
+      return '--:--';
+    }
+  }
+
   // 4. НАВИГАЦИЯ КПК
   const viewMenu = document.getElementById('viewMenu');
   const viewPassport = document.getElementById('viewPassport');
   const viewRadio = document.getElementById('viewRadio');
+  const viewZhek = document.getElementById('viewZhek');
   const viewStub = document.getElementById('viewStub');
   const viewAdmin = document.getElementById('viewAdmin');
 
   function showView(view) {
     playPdaBeep();
-    [viewMenu, viewPassport, viewRadio, viewStub, viewAdmin].forEach(v => {
+    [viewMenu, viewPassport, viewRadio, viewZhek, viewStub, viewAdmin].forEach(v => {
       if (v) v.classList.remove('active');
     });
     if (view) view.classList.add('active');
@@ -823,9 +1032,15 @@
 
   document.getElementById('openPassportApp').onclick = () => showView(viewPassport);
   document.getElementById('openRadioApp').onclick = () => showView(viewRadio);
+  document.getElementById('openZhekApp').onclick = () => {
+    showView(viewZhek);
+    loadZhekTickets();
+    setupProfessionQuest();
+  };
   document.getElementById('adminAppBtn').onclick = () => showView(viewAdmin);
   document.getElementById('backFromPassport').onclick = () => showView(viewMenu);
   document.getElementById('backFromRadio').onclick = () => showView(viewMenu);
+  document.getElementById('backFromZhek').onclick = () => showView(viewMenu);
   document.getElementById('backFromStub').onclick = () => showView(viewMenu);
   document.getElementById('backFromAdmin').onclick = () => showView(viewMenu);
 
@@ -835,7 +1050,6 @@
     showView(viewStub);
   }
   document.getElementById('btnStubMap').onclick = () => openStub('КАРТА СЕКТОРА', 'Спутниковая развёртка недоступна. Радиомачта №4 подавляет сторонние сигналы. Ориентируйтесь по визуальным ориентирам посёлка.');
-  document.getElementById('btnStubZhek').onclick = () => openStub('ДИСПЕТЧЕР ЖЭК', 'Журнал обращений ЖЭК №1. Приём жалоб на перебои электросети и посторонние шумы в коммуникациях.');
   document.getElementById('btnStubInv').onclick = () => openStub('СНАРЯЖЕНИЕ', 'Личные карманы гражданина. Талоны на керосин, ключи от подвалов и памятки учёта.');
   document.getElementById('btnStubMsgs').onclick = () => openStub('ДЕПЕШИ ГО/ЧС', 'Архив сводок комендатуры. Пломба №4 удерживает контур. Покидать жилой сектор после 23:00 запрещено.');
 
@@ -900,9 +1114,7 @@
       if (!isDraggingCard) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-        hasDragged = true;
-      }
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasDragged = true;
       currentRotY += dx * 0.7;
       currentRotX = Math.max(-45, Math.min(45, currentRotX - dy * 0.7));
       card.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
@@ -910,9 +1122,7 @@
       startY = e.clientY;
     });
 
-    window.addEventListener('pointerup', () => {
-      isDraggingCard = false;
-    });
+    window.addEventListener('pointerup', () => { isDraggingCard = false; });
   }
 
   // 7. ФОТО ЖИТЕЛЯ
@@ -1012,7 +1222,6 @@
     if (!code) return;
     const cleanCode = code.trim().toUpperCase();
 
-    // Мастер-коды для свободного тестирования
     if (cleanCode === 'СМУТА-84' || cleanCode === 'ЖЭК-ДОПУСК') {
       syncSet(uKey('name_locked'), 'false');
       syncSet(uKey('prof_locked'), 'false');
@@ -1030,16 +1239,13 @@
         return;
       }
 
-      // Проверка на одноразовость кода
       if (localStorage.getItem(uKey(`used_${cleanCode}`)) === 'true') {
         alert('ОТКАЗ: Данное служебное предписание уже было использовано и погашено ЖЭК №1.');
         return;
       }
 
-      // Валидация через контрольную сумму
       if (verifyUserToken(cleanCode, calculatedNumber)) {
         localStorage.setItem(uKey(`used_${cleanCode}`), 'true');
-        
         syncSet(uKey('name_locked'), 'false');
         syncSet(uKey('prof_locked'), 'false');
         syncSet(uKey('addr_locked'), 'false');
@@ -1079,9 +1285,7 @@
     syncGet(uKey(`${type}_locked`), (locked) => {
       if (locked === 'true' && !isAdmin) {
         const wantUnlock = confirm('Данная графа заверена печатью ЖЭК №1.\nСамовольное изменение запрещено.\n\nВвести служебное предписание коменданта для разблокировки?');
-        if (wantUnlock) {
-          handleTokenInput();
-        }
+        if (wantUnlock) handleTokenInput();
         return;
       }
 
@@ -1158,7 +1362,263 @@
     playStampThud();
   };
 
-  // 12. ПУЛЬТ КОМЕНДАНТА
+  // 12. ДИСПЕТЧЕР ЖЭК (ВКЛАДКИ, ЛОГИКА, КВЕСТЫ)
+  const tabBtnList = document.getElementById('tabBtnList');
+  const tabBtnCreate = document.getElementById('tabBtnCreate');
+  const tabBtnQuest = document.getElementById('tabBtnQuest');
+  const panelZhekList = document.getElementById('panelZhekList');
+  const panelZhekCreate = document.getElementById('panelZhekCreate');
+  const panelZhekQuest = document.getElementById('panelZhekQuest');
+
+  function setZhekTab(tab) {
+    playPdaBeep();
+    [tabBtnList, tabBtnCreate, tabBtnQuest].forEach(b => b.classList.remove('active'));
+    [panelZhekList, panelZhekCreate, panelZhekQuest].forEach(p => p.classList.remove('active'));
+    
+    if (tab === 'list') {
+      tabBtnList.classList.add('active'); panelZhekList.classList.add('active'); loadZhekTickets();
+    } else if (tab === 'create') {
+      tabBtnCreate.classList.add('active'); panelZhekCreate.classList.add('active');
+    } else if (tab === 'quest') {
+      tabBtnQuest.classList.add('active'); panelZhekQuest.classList.add('active'); setupProfessionQuest();
+    }
+  }
+
+  tabBtnList.onclick = () => setZhekTab('list');
+  tabBtnCreate.onclick = () => setZhekTab('create');
+  tabBtnQuest.onclick = () => setZhekTab('quest');
+
+  async function loadZhekTickets() {
+    const cont = document.getElementById('ticketsContainer');
+    cont.innerHTML = '<div style="font-size: 8.5px; color: #72a37d; text-align: center; padding: 12px;">Синхронизация с узлом ЖЭК...</div>';
+    try {
+      const tickets = await apiGetZhekTickets();
+      if (!tickets || tickets.length === 0) {
+        cont.innerHTML = '<div style="font-size: 8.5px; color: #555; text-align: center; padding: 12px;">Заявок в журнале пока нет.</div>';
+        return;
+      }
+
+      cont.innerHTML = tickets.map(t => {
+        let badgeClass = 'badge-open';
+        if (t.status === 'В РАБОТЕ') badgeClass = 'badge-work';
+        if (t.status === 'ИСПОЛНЕНО') badgeClass = 'badge-done';
+        if (t.status === 'ЗАСЕКРЕЧЕНО') badgeClass = 'badge-secret';
+
+        const adminResolveBtn = isAdmin ? `<button class="btn-act" onclick="openResolutionModal(${t.id}, '${t.status}')" style="margin-top: 4px; padding: 2px 6px; font-size: 7.5px; color: #f72585; border-color: #7209b7;">[РЕЗОЛЮЦИЯ ДИСПЕТЧЕРА]</button>` : '';
+
+        return `
+          <div class="ticket-card">
+            <div class="ticket-head">
+              <span class="ticket-num">№${t.id} • ${formatIstokDate(t.created_at)}</span>
+              <span class="ticket-badge ${badgeClass}">${t.status}</span>
+            </div>
+            <div><strong>${t.category}</strong> • ${t.address}</div>
+            <div style="font-size: 8.5px; color: #72a37d;">Заявитель: ${t.author_name} [№${t.author_passport}]</div>
+            <div style="background: rgba(0,0,0,0.4); padding: 4px; border-radius: 3px; font-size: 8.5px; margin-top: 2px;">${t.description}</div>
+            ${t.official_reply ? `<div class="ticket-resolution"><strong>ОТВЕТ ЖЭК:</strong> ${t.official_reply}</div>` : ''}
+            ${adminResolveBtn}
+          </div>
+        `;
+      }).join('');
+    } catch(e) {
+      cont.innerHTML = `<div style="font-size: 8.5px; color: #ff5555; text-align: center; padding: 10px;">Ошибка связи с ЖЭК: ${e.message}</div>`;
+    }
+  }
+
+  document.getElementById('btnRefreshTickets').onclick = () => {
+    playStampThud();
+    loadZhekTickets();
+  };
+
+  // Подача жалобы
+  document.getElementById('btnSubmitTicket').onclick = async () => {
+    const desc = document.getElementById('ticketDesc').value.trim();
+    if (!desc || desc.length < 5) {
+      alert('Укажите суть происшествия подробнее (не менее 5 символов).');
+      return;
+    }
+    if (isProfane(desc)) {
+      alert('ОТКЛОНЕНО:\nТекст обращения содержит недопустимые выражения.');
+      return;
+    }
+
+    const payload = {
+      author_passport: calculatedNumber,
+      author_name: document.getElementById('pName').innerText,
+      address: document.getElementById('ticketAddress').value,
+      category: document.getElementById('ticketCategory').value,
+      description: desc,
+      status: 'НА РАССМОТРЕНИИ'
+    };
+
+    try {
+      await apiCreateZhekTicket(payload);
+      playStampThud();
+      alert('ОБРАЩЕНИЕ ЗАРЕГИСТРИРОВАНО:\nЗаявка внесена в общепоселковый реестр ЖЭК №1.');
+      document.getElementById('ticketDesc').value = '';
+      setZhekTab('list');
+    } catch(e) {
+      alert('Ошибка регистрации заявки: ' + e.message);
+    }
+  };
+
+  // Модалка резолюции для коменданта
+  const resModal = document.getElementById('modalResolutionBackdrop');
+  window.openResolutionModal = (id, currentStatus) => {
+    document.getElementById('resTicketId').value = id;
+    document.getElementById('resStatusSelect').value = currentStatus || 'В РАБОТЕ';
+    document.getElementById('resText').value = '';
+    resModal.style.display = 'flex';
+  };
+  document.getElementById('btnCloseResolution').onclick = () => { resModal.style.display = 'none'; };
+  document.getElementById('btnSaveResolution').onclick = async () => {
+    const id = document.getElementById('resTicketId').value;
+    const status = document.getElementById('resStatusSelect').value;
+    const reply = document.getElementById('resText').value.trim();
+    if (!reply) {
+      alert('Введите текст резолюции.'); return;
+    }
+    try {
+      await apiUpdateZhekTicket(id, status, reply);
+      resModal.style.display = 'none';
+      playStampThud();
+      loadZhekTickets();
+    } catch(e) {
+      alert('Ошибка утверждения: ' + e.message);
+    }
+  };
+
+  // --- СЛУЖЕБНЫЙ НАРЯД (ИНТЕРАКТИВНЫЕ КВЕСТЫ) ---
+  let questState = { active: false, success: false, data: {} };
+
+  function setupProfessionQuest() {
+    const currentProf = document.getElementById('pProf').innerText;
+    const qTitle = document.getElementById('questTitle');
+    const qDesc = document.getElementById('questDesc');
+    const qArea = document.getElementById('questInteractiveArea');
+    const qBtn = document.getElementById('btnCompleteQuest');
+
+    qArea.innerHTML = '';
+    questState = { active: true, success: false, data: {} };
+    qBtn.style.display = 'block';
+
+    if (currentProf.includes('Радиомеханик')) {
+      qTitle.innerText = 'НАРЯД №14: КАЛИБРОВКА НЕСУЩЕЙ МАЧТЫ-4';
+      qDesc.innerText = 'Зафиксированы флуктуации фазы на радиомачте. Требуется совместить маркер фазометра с эталоном сети.';
+      
+      qArea.innerHTML = `
+        <div style="font-size: 8px; color: #4ade80;">ФАЗООТКЛОНЕНИЕ СЕТКИ: <span id="radioPhaseVal">45</span>°</div>
+        <div class="quest-gauge"><div class="gauge-fill" id="radioPhaseBar" style="width: 45%;"></div><div class="gauge-target" style="left: 70%; width: 16%;"></div></div>
+        <div style="display: flex; gap: 6px; width: 100%;">
+          <button class="btn-act" id="btnShiftPhase" style="flex: 1;">Сдвиг фазы (+7°)</button>
+          <button class="btn-act" id="btnResetPhase" style="flex: 1;">Сброс</button>
+        </div>
+      `;
+      let phase = 45;
+      document.getElementById('btnShiftPhase').onclick = () => {
+        phase = (phase + 7) % 100;
+        document.getElementById('radioPhaseVal').innerText = phase;
+        document.getElementById('radioPhaseBar').style.width = phase + '%';
+        if (phase >= 70 && phase <= 86) {
+          document.getElementById('radioPhaseBar').style.background = '#00ff66';
+          questState.success = true;
+        } else {
+          document.getElementById('radioPhaseBar').style.background = '#38b000';
+          questState.success = false;
+        }
+        playPdaBeep();
+      };
+      document.getElementById('btnResetPhase').onclick = () => {
+        phase = 15;
+        document.getElementById('radioPhaseVal').innerText = phase;
+        document.getElementById('radioPhaseBar').style.width = phase + '%';
+        document.getElementById('radioPhaseBar').style.background = '#38b000';
+        questState.success = false;
+      };
+
+    } else if (currentProf.includes('Слесарь')) {
+      qTitle.innerText = 'НАРЯД №22: ГИДРОУЗЕЛ БАРАЧНОГО СЕКТОРА';
+      qDesc.innerText = 'В подвале зафиксирован гидроудар. Отрегулируйте балансировочный клапан в диапазон 2.4 - 2.8 атм.';
+      
+      qArea.innerHTML = `
+        <div style="font-size: 8px; color: #ffb703;">ДАВЛЕНИЕ В МАГИСТРАЛИ: <span id="valvePressVal">1.2</span> атм</div>
+        <div class="quest-gauge"><div class="gauge-fill" id="valvePressBar" style="width: 25%;"></div><div class="gauge-target" style="left: 60%; width: 18%;"></div></div>
+        <div style="display: flex; gap: 6px; width: 100%;">
+          <button class="btn-act" id="btnValveUp" style="flex: 1;">Приоткрыть (+0.3)</button>
+          <button class="btn-act" id="btnValveDown" style="flex: 1;">Сброс пара (-0.4)</button>
+        </div>
+      `;
+      let press = 1.2;
+      const updatePress = () => {
+        press = Math.max(0.5, Math.min(4.0, press));
+        document.getElementById('valvePressVal').innerText = press.toFixed(1);
+        const percent = ((press - 0.5) / 3.5) * 100;
+        document.getElementById('valvePressBar').style.width = percent + '%';
+        if (press >= 2.4 && press <= 2.8) {
+          document.getElementById('valvePressBar').style.background = '#00ff66';
+          questState.success = true;
+        } else {
+          document.getElementById('valvePressBar').style.background = '#38b000';
+          questState.success = false;
+        }
+        playPdaBeep();
+      };
+      document.getElementById('btnValveUp').onclick = () => { press += 0.3; updatePress(); };
+      document.getElementById('btnValveDown').onclick = () => { press -= 0.4; updatePress(); };
+
+    } else if (currentProf.includes('Фельдшер')) {
+      qTitle.innerText = 'НАРЯД №09: ОСВИДЕТЕЛЬСТВОВАНИЕ ПАЦИЕНТА';
+      qDesc.innerText = 'Житель дома №7 жалуется на ночной шепот из розеток и тремор. Выберите регламентный протокол:';
+      
+      qArea.innerHTML = `
+        <select id="medProtocolSelect" style="width: 100%; background: #000; color: #fff; font-family: inherit; font-size: 9px; padding: 5px; border: 1px solid #233e29;">
+          <option value="none">-- Выберите медицинское назначение --</option>
+          <option value="wrong1">Выдать талоны на усиленное питание</option>
+          <option value="correct">Ввести раствор брома и назначить изоляцию на 12ч</option>
+          <option value="wrong2">Направить на ночную смену котельной</option>
+        </select>
+      `;
+      document.getElementById('medProtocolSelect').onchange = (e) => {
+        questState.success = (e.target.value === 'correct');
+        playPdaBeep();
+      };
+
+    } else {
+      qTitle.innerText = 'НАРЯД №31: ОСМОТР ПЛОМБ ТЕХНИЧЕСКОГО КОНТУРА';
+      qDesc.innerText = 'Пройдите по узловым точкам и подтвердите целостность контрольных свинцовых пломб ЖЭК №1.';
+      
+      qArea.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 4px; width: 100%; font-size: 8.5px;">
+          <label><input type="checkbox" id="sealChk1"> Пломба №1 (Щитовая ул. Строителей)</label>
+          <label><input type="checkbox" id="sealChk2"> Пломба №2 (Люк коллектора №3)</label>
+          <label><input type="checkbox" id="sealChk3"> Пломба №4 (Кабель радиомачты)</label>
+        </div>
+      `;
+      const checkAll = () => {
+        const c1 = document.getElementById('sealChk1').checked;
+        const c2 = document.getElementById('sealChk2').checked;
+        const c3 = document.getElementById('sealChk3').checked;
+        questState.success = (c1 && c2 && c3);
+        playPdaBeep();
+      };
+      document.getElementById('sealChk1').onchange = checkAll;
+      document.getElementById('sealChk2').onchange = checkAll;
+      document.getElementById('sealChk3').onchange = checkAll;
+    }
+
+    qBtn.onclick = () => {
+      if (!questState.success) {
+        alert('НАРЯД НЕ ВЫПОЛНЕН:\nТехнические параметры не соответствуют регламенту безопасности ЖЭК №1.');
+        return;
+      }
+      playStampThud();
+      alert('РАПОРТ ПРИНЯТ ✅\nСмена успешно закрыта. В карточку гражданина внесена отметка об образцовом дежурстве.');
+      qArea.innerHTML = '<div style="color: #4ade80; font-weight: bold; padding: 10px; text-align: center;">СМЕНА ЗАКРЫТА: НАРЯД ВЫПОЛНЕН ✅</div>';
+      qBtn.style.display = 'none';
+    };
+  }
+
+  // 13. ПУЛЬТ КОМЕНДАНТА
   document.getElementById('adminResetSelfBtn').onclick = () => {
     syncSet(uKey('name_locked'), 'false');
     syncSet(uKey('prof_locked'), 'false');
@@ -1234,7 +1694,7 @@
     }
   };
 
-  // 13. ЭКСПОРТ В ФОТО
+  // 14. ЭКСПОРТ В ФОТО
   document.getElementById('exportBtn').onclick = () => {
     const normalizedY = ((currentRotY % 360) + 360) % 360;
     const isBackFacing = normalizedY > 90 && normalizedY < 270;
@@ -1260,7 +1720,7 @@
     });
   };
 
-  // 14. РАДИОСКАНЕР
+  // 15. РАДИОСКАНЕР
   let isRadioOn = false;
   let currentFreq = 64.0;
   const minFreq = 64.0, maxFreq = 108.0;
@@ -1335,7 +1795,7 @@
         voiceGain.connect(ctx.destination);
         isWebAudioVoiceActive = true;
       } catch(e) {
-        console.warn("Direct audio mode fallback active:", e);
+        console.warn("Direct audio fallback active:", e);
       }
     }
   }
