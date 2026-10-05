@@ -205,6 +205,7 @@
     .card-wrap {
       width: 100%; height: 100%; position: absolute;
       transform-style: preserve-3d; border-radius: 12px; cursor: grab;
+      transition: transform 0.05s ease-out;
     }
     .card-wrap:active { cursor: grabbing; }
     .card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 12px; overflow: hidden; }
@@ -657,16 +658,40 @@
     return await res.json();
   }
 
+  // =======================================================
+  // ДИНАМИЧЕСКИЙ ГЕНЕРАТОР И ВАЛИДАТОР ПРЕДПИСАНИЙ ЖЭК
+  // =======================================================
   const SECRET_SALT = 7943;
+
+  function calculateChecksum(passport, nonce) {
+    let hash = 0;
+    const combined = String(passport) + String(nonce) + SECRET_SALT;
+    for (let i = 0; i < combined.length; i++) {
+      hash = (hash * 31 + combined.charCodeAt(i) * 17) % 9000;
+    }
+    return String(Math.abs(hash) % 90 + 10);
+  }
+
   function generateUserToken(targetNum) {
     const clean = String(targetNum).trim();
     if (clean.length !== 6 || isNaN(clean)) return null;
-    let hash = 0;
-    for (let i = 0; i < clean.length; i++) {
-      hash = (hash * 31 + clean.charCodeAt(i) * SECRET_SALT) % 9000;
-    }
-    const checksum = String(Math.abs(hash) + 1000).slice(0, 4);
-    return `ИСТОК-${clean}-${checksum}`;
+    const nonce = Math.floor(10 + Math.random() * 90);
+    const checksum = calculateChecksum(clean, nonce);
+    return `ИСТОК-${clean}-${nonce}${checksum}`;
+  }
+
+  function verifyUserToken(cleanCode, expectedPassport) {
+    const parts = cleanCode.split('-');
+    if (parts.length !== 3 || parts[0] !== 'ИСТОК') return false;
+    if (parts[1] !== expectedPassport) return false;
+
+    const tail = parts[2];
+    if (tail.length !== 4 || isNaN(tail)) return false;
+
+    const nonce = tail.slice(0, 2);
+    const checksum = tail.slice(2, 4);
+
+    return calculateChecksum(expectedPassport, nonce) === checksum;
   }
 
   // 1. АУДИО
@@ -742,7 +767,6 @@
   const rawId = tgUser?.id ? String(tgUser.id) : (localStorage.getItem('istok_dev_id') || String(Math.floor(100000 + Math.random() * 900000)));
   if (!tgUser && !localStorage.getItem('istok_dev_id')) localStorage.setItem('istok_dev_id', rawId);
 
-  // Персональный ключ изоляции хранилища
   const uKey = (key) => `istok_u${rawId}_${key}`;
 
   function syncSet(key, value) {
@@ -856,44 +880,40 @@
     photoPlaceholder.style.display = 'block';
   }
 
-  // 6. 3D ПАСПОРТ
+  // 6. ТРЕХМЕРНОЕ ВРАЩЕНИЕ ПАСПОРТА
   const card = document.getElementById('card');
-  let isDragging = false, startX = 0, startY = 0;
-  let currentRotY = -7, currentRotX = 4;
-  let prevRotY = -7, prevRotX = 4;
+  const scene = document.getElementById('sceneContainer');
+  let isDraggingCard = false;
   let hasDragged = false;
+  let startX = 0, startY = 0;
+  let currentRotX = 0, currentRotY = 0;
 
-  function applyCardTransform() {
-    card.style.transform = `rotateY(${currentRotY}deg) rotateX(${currentRotX}deg)`;
-    const shadowX = -currentRotY * 1.5;
-    const shadowY = Math.max(15, 25 + currentRotX * 1.2);
-    card.style.boxShadow = `${shadowX}px ${shadowY}px 45px rgba(0,0,0,0.85)`;
+  if (scene && card) {
+    scene.onpointerdown = (e) => {
+      isDraggingCard = true;
+      hasDragged = false;
+      startX = e.clientX;
+      startY = e.clientY;
+    };
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDraggingCard) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        hasDragged = true;
+      }
+      currentRotY += dx * 0.7;
+      currentRotX = Math.max(-45, Math.min(45, currentRotX - dy * 0.7));
+      card.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    window.addEventListener('pointerup', () => {
+      isDraggingCard = false;
+    });
   }
-  applyCardTransform();
-
-  window.addEventListener('pointerdown', (e) => {
-    if (!viewPassport.classList.contains('active')) return;
-    if (e.target.closest('#modalBackdrop') || e.target.closest('#exportBtn') || e.target.closest('#quickUnlockBtn') || e.target.closest('.btn-back-pda')) return;
-    isDragging = true;
-    hasDragged = false;
-    startX = e.clientX;
-    startY = e.clientY;
-    prevRotY = currentRotY;
-    prevRotX = currentRotX;
-  });
-
-  window.addEventListener('pointermove', (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    if (Math.hypot(dx, dy) > 6) { hasDragged = true; clearHold(); }
-    currentRotY = prevRotY + dx * 0.75;
-    currentRotX = Math.max(-35, Math.min(35, prevRotX - dy * 0.45));
-    applyCardTransform();
-  });
-
-  window.addEventListener('pointerup', () => { isDragging = false; });
-  window.addEventListener('pointercancel', () => { isDragging = false; });
 
   // 7. ФОТО ЖИТЕЛЯ
   const photoTrigger = document.getElementById('photoTrigger');
@@ -1016,12 +1036,10 @@
         return;
       }
 
-      const expectedCode = generateUserToken(calculatedNumber);
-      if (cleanCode === expectedCode) {
-        // Погашаем код навсегда
+      // Валидация через контрольную сумму
+      if (verifyUserToken(cleanCode, calculatedNumber)) {
         localStorage.setItem(uKey(`used_${cleanCode}`), 'true');
         
-        // Разрешаем РОВНО ОДНО редактирование каждой из граф
         syncSet(uKey('name_locked'), 'false');
         syncSet(uKey('prof_locked'), 'false');
         syncSet(uKey('addr_locked'), 'false');
@@ -1059,7 +1077,6 @@
     if (hasDragged) return;
 
     syncGet(uKey(`${type}_locked`), (locked) => {
-      // Если поле заблокировано и это не комендант:
       if (locked === 'true' && !isAdmin) {
         const wantUnlock = confirm('Данная графа заверена печатью ЖЭК №1.\nСамовольное изменение запрещено.\n\nВвести служебное предписание коменданта для разблокировки?');
         if (wantUnlock) {
@@ -1099,11 +1116,9 @@
   document.getElementById('pProf').onclick = () => openEditField('prof');
   document.getElementById('pAddress').onclick = () => openEditField('addr');
 
-  // Кнопка ввода предписания под паспортом
   document.getElementById('quickUnlockBtn').onclick = () => handleTokenInput();
   document.getElementById('enterCodeLink').onclick = () => handleTokenInput();
 
-  // Сохранение графы (С НЕМЕДЛЕННОЙ ПОВТОРНОЙ БЛОКИРОВКОЙ)
   modalSaveBtn.onclick = async () => {
     let savedVal = '';
     if (currentEditingField === 'name') {
@@ -1118,7 +1133,6 @@
       document.getElementById('pName').innerText = val;
       document.getElementById('hudCallsign').innerText = `${val.toUpperCase()} • ${calculatedSeries}`;
       syncSet(uKey('name'), val);
-      // Сразу блокируем графу после сохранения
       if (!isAdmin) syncSet(uKey('name_locked'), 'true');
     } else if (currentEditingField === 'prof') {
       savedVal = document.getElementById('modalSelectField').value;
@@ -1132,7 +1146,6 @@
       if (!isAdmin) syncSet(uKey('addr_locked'), 'true');
     }
 
-    // Сохранение в базу данных посёлка Supabase
     apiSaveResident({
       passport_number: calculatedNumber,
       series: calculatedSeries,
@@ -1154,7 +1167,6 @@
     playStampThud();
   };
 
-  // Генерация персонального предписания
   document.getElementById('genPersonalTokenBtn').onclick = () => {
     const targetNum = document.getElementById('targetPassportInput').value.trim();
     if (targetNum.length !== 6 || isNaN(targetNum)) {
@@ -1167,7 +1179,6 @@
     playStampThud();
   };
 
-  // КОПИРОВАНИЕ КОДА ПО КЛИКУ НА ПЛАШКУ В БУФЕР ОБМЕНА
   document.getElementById('tokenDisplay').onclick = function() {
     const textToCopy = this.innerText.trim();
     if (textToCopy === '---' || !textToCopy) return;
@@ -1201,7 +1212,6 @@
     document.body.removeChild(tempInput);
   }
 
-  // Загрузка живого списка из Supabase
   document.getElementById('refreshRegistryBtn').onclick = async () => {
     const display = document.getElementById('registryDisplay');
     display.innerText = 'Запрос к реестру посёлка...';
