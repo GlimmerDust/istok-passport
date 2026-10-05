@@ -6,7 +6,7 @@
   <title>КПК «ИСТОК-М» • ПГТ Нижний Исток</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- Подключение Supabase -->
+  <!-- Подключение Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -378,7 +378,6 @@
 </head>
 <body>
 
-<!-- АУДИОФАЙЛ ДЕПЕШИ ДИСПЕТЧЕРА -->
 <audio id="radioVoice" src="./welcome.mp3" loop preload="auto"></audio>
 
 <div class="pda-device">
@@ -399,7 +398,7 @@
     
     <div class="pda-hud">
       <span id="hudCallsign">ЖИТЕЛЬ • ИСТ-79</span>
-      <span class="pda-hud-time" id="hudClock">12:00 [ИСТОК]</span>
+      <span class="pda-hud-time" id="hudClock">--:-- [ИСТОК]</span>
       <span>МАЧТА-4: 86%</span>
     </div>
 
@@ -619,23 +618,25 @@
 
 <script>
   // ==========================================
-  // ТВОИ КЛЮЧИ ПОДКЛЮЧЕНИЯ SUPABASE
+  // ПОДКЛЮЧЕНИЕ К SUPABASE
   // ==========================================
   const SUPABASE_URL = 'https://mqauywugbbnrgmgsnpce.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_0x7b55RNv2o4KNVs7tgGjg_yWwpd5Qt';
   
-  let supabase = null;
-  if (window.supabase) {
+  let dbClient = null;
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
     try {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch(e) { console.warn("Supabase init error:", e); }
+      dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e) {
+      console.warn("Supabase init error:", e);
+    }
   }
 
   // СЕКРЕТНЫЙ СОЛЕВОЙ КЛЮЧ КОМЕНДАТУРЫ
   const SECRET_SALT = 7943;
 
   function generateUserToken(targetNum) {
-    const clean = targetNum.trim();
+    const clean = String(targetNum).trim();
     if (clean.length !== 6 || isNaN(clean)) return null;
     let hash = 0;
     for (let i = 0; i < clean.length; i++) {
@@ -711,8 +712,10 @@
   // 2. ОБЛАЧНОЕ ХРАНИЛИЩЕ TELEGRAM
   const tg = window.Telegram?.WebApp;
   if (tg) {
-    tg.ready();
-    tg.expand();
+    try {
+      tg.ready();
+      tg.expand();
+    } catch(e){}
   }
 
   function syncSet(key, value) {
@@ -746,7 +749,8 @@
     const istokTime = new Date(utcTime + (3600000 * 9));
     const hours = String(istokTime.getHours()).padStart(2, '0');
     const mins = String(istokTime.getMinutes()).padStart(2, '0');
-    document.getElementById('hudClock').innerText = `${hours}:${mins} [ИСТОК]`;
+    const clockEl = document.getElementById('hudClock');
+    if (clockEl) clockEl.innerText = `${hours}:${mins} [ИСТОК]`;
   }
   setInterval(updateIstokClock, 1000);
   updateIstokClock();
@@ -760,17 +764,19 @@
 
   function showView(view) {
     playPdaBeep();
-    [viewMenu, viewPassport, viewRadio, viewStub, viewAdmin].forEach(v => v.classList.remove('active'));
-    view.classList.add('active');
+    [viewMenu, viewPassport, viewRadio, viewStub, viewAdmin].forEach(v => {
+      if (v) v.classList.remove('active');
+    });
+    if (view) view.classList.add('active');
   }
 
-  document.getElementById('openPassportApp').addEventListener('click', () => showView(viewPassport));
-  document.getElementById('openRadioApp').addEventListener('click', () => showView(viewRadio));
-  document.getElementById('adminAppBtn').addEventListener('click', () => showView(viewAdmin));
-  document.getElementById('backFromPassport').addEventListener('click', () => showView(viewMenu));
-  document.getElementById('backFromRadio').addEventListener('click', () => showView(viewMenu));
-  document.getElementById('backFromStub').addEventListener('click', () => showView(viewMenu));
-  document.getElementById('backFromAdmin').addEventListener('click', () => showView(viewMenu));
+  document.getElementById('openPassportApp')?.addEventListener('click', () => showView(viewPassport));
+  document.getElementById('openRadioApp')?.addEventListener('click', () => showView(viewRadio));
+  document.getElementById('adminAppBtn')?.addEventListener('click', () => showView(viewAdmin));
+  document.getElementById('backFromPassport')?.addEventListener('click', () => showView(viewMenu));
+  document.getElementById('backFromRadio')?.addEventListener('click', () => showView(viewMenu));
+  document.getElementById('backFromStub')?.addEventListener('click', () => showView(viewMenu));
+  document.getElementById('backFromAdmin')?.addEventListener('click', () => showView(viewMenu));
 
   window.openStub = function(title, text) {
     document.getElementById('stubTitle').innerText = title;
@@ -786,10 +792,12 @@
   const calculatedSeries = 'ИСТ-' + ((Math.abs(Number(rawId)) % 80) + 15);
   let calculatedNumber = String(Math.abs(Number(rawId)) % 1000000).padStart(6, '0');
 
+  // ПРОВЕРКА ПРАВ КОМЕНДАНТА
   const ADMIN_NUMBERS = ['501517'];
-  const isAdmin = ADMIN_NUMBERS.includes(calculatedNumber) || (tgUser?.username === 'glimmerdust19');
+  const isAdmin = ADMIN_NUMBERS.includes(calculatedNumber) || (tgUser?.username === 'glimmerdust19') || calculatedNumber === '501517';
   if (isAdmin) {
-    document.getElementById('adminAppBtn').style.display = 'flex';
+    const adminBtn = document.getElementById('adminAppBtn');
+    if (adminBtn) adminBtn.style.display = 'flex';
   }
 
   document.getElementById('pSeries').innerText = calculatedSeries;
@@ -812,7 +820,7 @@
     document.getElementById('photoPlaceholder').style.display = 'none';
   }
 
-  // 6. 3D ПАСПОРТ: ВРАЩЕНИЕ
+  // 6. 3D ПАСПОРТ
   const card = document.getElementById('card');
   let isDragging = false, startX = 0, startY = 0;
   let currentRotY = -7, currentRotX = 4;
@@ -998,12 +1006,12 @@
     });
   }
 
-  document.getElementById('pName').addEventListener('click', () => openEditField('name'));
-  document.getElementById('pProf').addEventListener('click', () => openEditField('prof'));
-  document.getElementById('pAddress').addEventListener('click', () => openEditField('addr'));
+  document.getElementById('pName')?.addEventListener('click', () => openEditField('name'));
+  document.getElementById('pProf')?.addEventListener('click', () => openEditField('prof'));
+  document.getElementById('pAddress')?.addEventListener('click', () => openEditField('addr'));
 
-  // Сохранение данных и автоматическая отправка в Supabase
-  modalSaveBtn.addEventListener('click', async () => {
+  // СОХРАНЕНИЕ В БАЗУ SUPABASE
+  modalSaveBtn?.addEventListener('click', async () => {
     let savedVal = '';
     if (currentEditingField === 'name') {
       const val = document.getElementById('modalInputName').value.trim();
@@ -1030,17 +1038,16 @@
       if (!isAdmin) syncSet('istok_addr_locked', 'true');
     }
 
-    // Сохранение в центральную картотеку Supabase
-    if (supabase) {
+    if (dbClient) {
       try {
-        await supabase.from('residents').upsert({
+        await dbClient.from('residents').upsert({
           passport_number: calculatedNumber,
           series: calculatedSeries,
           name: document.getElementById('pName').innerText,
           profession: document.getElementById('pProf').innerText,
           address: document.getElementById('pAddress').innerText
         });
-      } catch(e) { console.warn("Supabase upsert:", e); }
+      } catch(e) { console.warn("Supabase upsert error:", e); }
     }
 
     modalBackdrop.style.display = 'none';
@@ -1048,12 +1055,11 @@
   });
 
   // ВВОД ПЕРСОНАЛЬНОГО КОДА РАЗБЛОКИРОВКИ
-  document.getElementById('enterCodeLink').addEventListener('click', () => {
+  document.getElementById('enterCodeLink')?.addEventListener('click', () => {
     const code = prompt('Введите служебный код предписания ЖЭК:');
     if (!code) return;
     const cleanCode = code.trim().toUpperCase();
 
-    // Мастер-коды
     if (cleanCode === 'СМУТА-84' || cleanCode === 'ЖЭК-ДОПУСК') {
       syncSet('istok_name_locked', 'false');
       syncSet('istok_prof_locked', 'false');
@@ -1064,11 +1070,9 @@
       return;
     }
 
-    // Персональный код жителя (ИСТОК-НОМЕР-ХХХХ)
     const parts = cleanCode.split('-');
     if (parts.length === 3 && parts[0] === 'ИСТОК') {
       const codeTargetPassport = parts[1];
-      
       if (codeTargetPassport !== calculatedNumber) {
         alert(`ОТКАЗ В ДОСТУПЕ:\nДанное предписание выписано на гражданина №${codeTargetPassport}.\nВаш номер в картотеке — №${calculatedNumber}.\nПопытка использования чужого документа зафиксирована комендатурой.`);
         return;
@@ -1079,7 +1083,7 @@
         syncSet('istok_name_locked', 'false');
         syncSet('istok_prof_locked', 'false');
         syncSet('istok_addr_locked', 'false');
-        alert('СЛУЖЕБНОЕ ПРЕДПИСАНИЕ ПОДТВЕРЖДЕНО:\nЛичность верифицирована. Печать снята. Вы можете заново выбрать данные.');
+        alert('СЛУЖЕБНОЕ ПРЕДПИСАНИЕ ПОДТВЕРЖДЕНО:\nЛичность верифицирована. Печать снята.');
         modalBackdrop.style.display = 'none';
         playStampThud();
       } else {
@@ -1091,7 +1095,7 @@
   });
 
   // 11. ПУЛЬТ КОМЕНДАНТА
-  document.getElementById('adminResetSelfBtn').addEventListener('click', () => {
+  document.getElementById('adminResetSelfBtn')?.addEventListener('click', () => {
     syncSet('istok_name_locked', 'false');
     syncSet('istok_prof_locked', 'false');
     syncSet('istok_addr_locked', 'false');
@@ -1099,8 +1103,7 @@
     playStampThud();
   });
 
-  // Генерация персонального предписания
-  document.getElementById('genPersonalTokenBtn').addEventListener('click', () => {
+  document.getElementById('genPersonalTokenBtn')?.addEventListener('click', () => {
     const targetNum = document.getElementById('targetPassportInput').value.trim();
     if (targetNum.length !== 6 || isNaN(targetNum)) {
       alert('Укажите корректный 6-значный номер паспорта жителя.');
@@ -1112,16 +1115,15 @@
     alert(`Персональное предписание сформировано:\n${token}\n\nОтправьте его жителю №${targetNum}. Ни один другой игрок не сможет им воспользоваться.`);
   });
 
-  // Загрузка живого списка из Supabase
-  document.getElementById('refreshRegistryBtn').addEventListener('click', async () => {
+  document.getElementById('refreshRegistryBtn')?.addEventListener('click', async () => {
     const display = document.getElementById('registryDisplay');
-    if (!supabase) {
+    if (!dbClient) {
       display.innerHTML = `<span style="color:#ff5555;">База данных не подключена.</span>`;
       return;
     }
     display.innerText = 'Запрос к реестру посёлка...';
     try {
-      const { data, error } = await supabase.from('residents').select('*').order('registered_at', { ascending: false });
+      const { data, error } = await dbClient.from('residents').select('*').order('registered_at', { ascending: false });
       if (error) throw error;
       if (!data || data.length === 0) {
         display.innerText = 'В картотеке пока нет зарегистрированных жителей.';
@@ -1142,7 +1144,7 @@
 
   // 12. ЭКСПОРТ В ФОТО
   const exportBtn = document.getElementById('exportBtn');
-  exportBtn.addEventListener('click', () => {
+  exportBtn?.addEventListener('click', () => {
     const normalizedY = ((currentRotY % 360) + 360) % 360;
     const isBackFacing = normalizedY > 90 && normalizedY < 270;
     const targetElement = isBackFacing ? document.getElementById('passportBack') : document.getElementById('passportFront');
@@ -1327,7 +1329,7 @@
     updateRadioAudio();
   }
 
-  powerBtn.addEventListener('click', () => {
+  powerBtn?.addEventListener('click', () => {
     isRadioOn = !isRadioOn;
     playStampThud();
     if (isRadioOn) {
@@ -1353,7 +1355,7 @@
   });
 
   let isDialDragging = false;
-  radioDial.addEventListener('pointerdown', (e) => {
+  radioDial?.addEventListener('pointerdown', (e) => {
     isDialDragging = true;
     const rect = radioDial.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -1370,7 +1372,7 @@
   window.addEventListener('pointerup', () => { isDialDragging = false; });
 
   let knobStartX = 0, isKnobDragging = false, knobRot = 0;
-  tuningKnob.addEventListener('pointerdown', (e) => { isKnobDragging = true; knobStartX = e.clientX; });
+  tuningKnob?.addEventListener('pointerdown', (e) => { isKnobDragging = true; knobStartX = e.clientX; });
   window.addEventListener('pointermove', (e) => {
     if (!isKnobDragging) return;
     const dx = e.clientX - knobStartX;
