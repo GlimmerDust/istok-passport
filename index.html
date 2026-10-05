@@ -6,6 +6,8 @@
   <title>КПК «ИСТОК-М» • ПГТ Нижний Исток</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Подключение Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --pda-shell: #16181b;
@@ -348,6 +350,13 @@
       background: #0d040c; border: 1px dashed #f72585; color: #4cc9f0; padding: 6px;
       text-align: center; font-weight: bold; font-size: 12px; letter-spacing: 2px; margin-top: 5px;
     }
+    .registry-box {
+      max-height: 140px; overflow-y: auto; background: #0c040b; border: 1px solid #33122e;
+      padding: 6px; font-size: 9px; line-height: 1.4; border-radius: 4px; margin-top: 5px;
+    }
+    .registry-item {
+      border-bottom: 1px dashed #44173e; padding-bottom: 4px; margin-bottom: 4px;
+    }
 
     /* МОДАЛКА */
     .modal-backdrop {
@@ -369,7 +378,7 @@
 </head>
 <body>
 
-<!-- АУДИОФАЙЛ ДЕПЕШИ (БЕЗ КОНФЛИКТНЫХ CORS АТРИБУТОВ) -->
+<!-- АУДИОФАЙЛ ДЕПЕШИ ДИСПЕТЧЕРА -->
 <audio id="radioVoice" src="./welcome.mp3" loop preload="auto"></audio>
 
 <div class="pda-device">
@@ -570,18 +579,21 @@
           <button class="admin-btn-action" id="adminResetSelfBtn">Снять свои замки (Править всё)</button>
         </div>
 
+        <!-- 1. ПЕРСОНАЛЬНОЕ ПРЕДПИСАНИЕ -->
         <div class="admin-card">
-          <h4>СЛУЖЕБНЫЙ КОД ДЛЯ ЖИТЕЛЕЙ</h4>
-          <div style="font-size: 8.5px; opacity: 0.8;">Сгенерируйте код для игрока, чтобы разблокировать его паспорт:</div>
-          <button class="admin-btn-action" id="genTokenBtn">Сгенерировать код допуска</button>
+          <h4>ПЕРСОНАЛЬНОЕ ПРЕДПИСАНИЕ ЖЭК</h4>
+          <div style="font-size: 8.5px; opacity: 0.8;">Введите 6-значный номер паспорта жителя:</div>
+          <input type="text" id="targetPassportInput" placeholder="Например: 894898" style="width: 100%; padding: 5px; margin-top: 4px; background: #000; border: 1px solid #7209b7; color: #fff; font-family: inherit; font-size: 10px;">
+          <button class="admin-btn-action" id="genPersonalTokenBtn">Выписать предписание для жителя</button>
           <div class="token-box" id="tokenDisplay">---</div>
         </div>
 
+        <!-- 2. КАРТОТЕКА ЖИТЕЛЕЙ ПОСЁЛКА -->
         <div class="admin-card">
-          <h4>НАЗНАЧЕНИЕ КОМЕНДАНТА</h4>
-          <div style="font-size: 8.5px; opacity: 0.8;">Введите 6-значный номер паспорта, чтобы выдать админ-права:</div>
-          <input type="text" id="newAdminNumInput" placeholder="Например: 049281" style="width: 100%; padding: 5px; margin-top: 4px; background: #000; border: 1px solid #7209b7; color: #fff; font-family: inherit; font-size: 10px;">
-          <button class="admin-btn-action" id="addAdminBtn">Выдать права коменданта</button>
+          <h4>КАРТОТЕКА ЖИТЕЛЕЙ [РЕЕСТР]</h4>
+          <div style="font-size: 8.5px; opacity: 0.8;">Список зарегистрированных граждан в базе посёлка:</div>
+          <button class="admin-btn-action" id="refreshRegistryBtn">Загрузить картотеку ЖЭКа</button>
+          <div class="registry-box" id="registryDisplay">Нажмите «Загрузить», чтобы получить список...</div>
         </div>
       </div>
     </div>
@@ -606,6 +618,33 @@
 </div>
 
 <script>
+  // ==========================================
+  // ТВОИ КЛЮЧИ ПОДКЛЮЧЕНИЯ SUPABASE
+  // ==========================================
+  const SUPABASE_URL = 'https://mqauywugbbnrgmgsnpce.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_0x7b55RNv2o4KNVs7tgGjg_yWwpd5Qt';
+  
+  let supabase = null;
+  if (window.supabase) {
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch(e) { console.warn("Supabase init error:", e); }
+  }
+
+  // СЕКРЕТНЫЙ СОЛЕВОЙ КЛЮЧ КОМЕНДАТУРЫ
+  const SECRET_SALT = 7943;
+
+  function generateUserToken(targetNum) {
+    const clean = targetNum.trim();
+    if (clean.length !== 6 || isNaN(clean)) return null;
+    let hash = 0;
+    for (let i = 0; i < clean.length; i++) {
+      hash = (hash * 31 + clean.charCodeAt(i) * SECRET_SALT) % 9000;
+    }
+    const checksum = String(Math.abs(hash) + 1000).slice(0, 4);
+    return `ИСТОК-${clean}-${checksum}`;
+  }
+
   // 1. АУДИОСИСТЕМА (WEB AUDIO API)
   let audioCtx = null;
   function getAudioContext() {
@@ -678,13 +717,8 @@
 
   function syncSet(key, value) {
     localStorage.setItem(key, value);
-    // В CloudStorage пишем ТОЛЬКО легкие текстовые параметры (лимит TG 4096 байт)
     if (tg?.CloudStorage && key !== 'istok_avatar') {
-      try {
-        tg.CloudStorage.setItem(key, String(value), (err) => {
-          if (err) console.warn("CloudStorage set error:", err);
-        });
-      } catch(e){}
+      try { tg.CloudStorage.setItem(key, String(value), () => {}); } catch(e){}
     }
   }
 
@@ -744,7 +778,7 @@
     showView(viewStub);
   };
 
-  // 5. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И АДМИНКА
+  // 5. ДАННЫЕ ПОЛЬЗОВАТЕЛЯ
   const tgUser = tg?.initDataUnsafe?.user;
   const rawId = tgUser?.id || (localStorage.getItem('istok_mock_id') || Math.floor(100000 + Math.random() * 900000));
   if (!tgUser) localStorage.setItem('istok_mock_id', rawId);
@@ -752,14 +786,8 @@
   const calculatedSeries = 'ИСТ-' + ((Math.abs(Number(rawId)) % 80) + 15);
   let calculatedNumber = String(Math.abs(Number(rawId)) % 1000000).padStart(6, '0');
 
-  // Динамический список администраторов
-  let adminList = ['501517'];
-  try {
-    const savedAdmins = JSON.parse(localStorage.getItem('istok_admin_list') || '[]');
-    adminList = Array.from(new Set([...adminList, ...savedAdmins]));
-  } catch(e){}
-
-  const isAdmin = adminList.includes(calculatedNumber) || (tgUser?.username === 'glimmerdust19');
+  const ADMIN_NUMBERS = ['501517'];
+  const isAdmin = ADMIN_NUMBERS.includes(calculatedNumber) || (tgUser?.username === 'glimmerdust19');
   if (isAdmin) {
     document.getElementById('adminAppBtn').style.display = 'flex';
   }
@@ -776,7 +804,6 @@
   syncGet('istok_prof', (val) => { if (val) document.getElementById('pProf').innerText = val; });
   syncGet('istok_addr', (val) => { if (val) document.getElementById('pAddress').innerText = val; });
 
-  // Фото загружается из localStorage
   const savedAvatar = localStorage.getItem('istok_avatar');
   if (savedAvatar) {
     const userPhoto = document.getElementById('userPhoto');
@@ -891,53 +918,33 @@
   seal.addEventListener('pointerleave', clearHold);
   secretLayer.addEventListener('dblclick', () => { secretLayer.style.display = 'none'; });
 
-  // 9. ГЛУБОКИЙ АНТИМАТ: РАСПОЗНАВАНИЕ МАСКИРОВОК (С*ка, П*зда, Х*й и т.д.)
+  // 9. АНТИМАТ
   function isProfane(raw) {
     if (!raw || raw.trim().length === 0) return true;
     const rawLower = raw.toLowerCase().trim();
-
     const leet = {
       '4': 'ч', '0': 'о', '1': 'и', '3': 'з', '6': 'б', '@': 'а', '$': 'с',
       'y': 'у', 'u': 'у', 'k': 'к', 'p': 'р', 'c': 'с', 'x': 'х', 'e': 'е',
       'a': 'а', 'o': 'о', 'b': 'б', 't': 'т', 'h': 'х', 'v': 'в', 'w': 'в'
     };
-
     const badRoots = [
-      /ху[йиеяюеё]/,
-      /п[иеё]зд/,
-      /[её]б[аеиоул]/,
-      /бл[яе]/,
-      /м[уy]д[аa][кkч]/,
-      /г[аa]нд[оo]н/,
-      /с[уy][чч4][кkаa]/,
-      /с[уy][кk][аa]/,
-      /с[кk][аa]/,
-      /чм[оo]/,
-      /з[аa]л[уy]п/,
-      /г[оo]вн/,
-      /д[еe]рьм/,
-      /шл[юy]х/,
-      /п[ие]д[оa]р/,
-      /х[еe]р/,
+      /ху[йиеяюеё]/, /п[иеё]зд/, /[её]б[аеиоул]/, /бл[яе]/, /м[уy]д[аa][кkч]/,
+      /г[аa]нд[оo]н/, /с[уy][чч4][кkаa]/, /с[уy][кk][аa]/, /с[кk][аa]/,
+      /чм[оo]/, /з[аa]л[уy]п/, /г[оo]вн/, /д[еe]рьм/, /шл[юy]х/, /п[ие]д[оa]р/, /х[еe]р/,
       /fuck/, /bitch/, /shit/, /cunt/, /dick/, /asshole/, /whore/
     ];
-
-    // Проверяем исходный текст с заменой масок на разные гласные звуки
     const vowelsToTest = ['', 'у', 'и', 'е', 'а', 'о', 'я'];
     for (let v of vowelsToTest) {
       let candidate = rawLower.replace(/[\*_~#\-\.\$\s\+]/g, v);
       let normalized = candidate.split('').map(ch => leet[ch] || ch).join('');
       normalized = normalized.replace(/[^а-яa-z]/g, '');
       normalized = normalized.replace(/(.)\1+/g, '$1');
-
-      if (badRoots.some(rx => rx.test(normalized))) {
-        return true;
-      }
+      if (badRoots.some(rx => rx.test(normalized))) return true;
     }
     return false;
   }
 
-  // 10. МОДАЛКА РЕДАКТИРОВАНИЯ
+  // 10. МОДАЛКА
   const modalBackdrop = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
   const modalDesc = document.getElementById('modalDesc');
@@ -960,7 +967,7 @@
 
     syncGet(`istok_${type}_locked`, (locked) => {
       if (locked === 'true' && !isAdmin) {
-        alert('Данная графа заверена печатью ЖЭК №1.\nСамовольное внесение изменений запрещено.\nОбратитесь к диспетчеру за служебным кодом.');
+        alert('Данная графа заверена печатью ЖЭК №1.\nСамовольное внесение изменений запрещено.\nОбратитесь к коменданту за служебным кодом.');
         return;
       }
 
@@ -995,7 +1002,9 @@
   document.getElementById('pProf').addEventListener('click', () => openEditField('prof'));
   document.getElementById('pAddress').addEventListener('click', () => openEditField('addr'));
 
-  modalSaveBtn.addEventListener('click', () => {
+  // Сохранение данных и автоматическая отправка в Supabase
+  modalSaveBtn.addEventListener('click', async () => {
+    let savedVal = '';
     if (currentEditingField === 'name') {
       const val = document.getElementById('modalInputName').value.trim();
       if (!val || val.length < 2) { alert('Имя должно содержать не менее 2 символов.'); return; }
@@ -1004,43 +1013,84 @@
         alert('ОТКАЗ В РЕГИСТРАЦИИ:\nКомендатура посёлка отклонила указанное имя за нарушение норм общественной морали.');
         return;
       }
+      savedVal = val;
       document.getElementById('pName').innerText = val;
       document.getElementById('hudCallsign').innerText = `${val.toUpperCase()} • ${calculatedSeries}`;
       syncSet('istok_name', val);
       if (!isAdmin) syncSet('istok_name_locked', 'true');
     } else if (currentEditingField === 'prof') {
-      const val = document.getElementById('modalSelectField').value;
-      document.getElementById('pProf').innerText = val;
-      syncSet('istok_prof', val);
+      savedVal = document.getElementById('modalSelectField').value;
+      document.getElementById('pProf').innerText = savedVal;
+      syncSet('istok_prof', savedVal);
       if (!isAdmin) syncSet('istok_prof_locked', 'true');
     } else if (currentEditingField === 'addr') {
-      const val = document.getElementById('modalSelectField').value;
-      document.getElementById('pAddress').innerText = val;
-      syncSet('istok_addr', val);
+      savedVal = document.getElementById('modalSelectField').value;
+      document.getElementById('pAddress').innerText = savedVal;
+      syncSet('istok_addr', savedVal);
       if (!isAdmin) syncSet('istok_addr_locked', 'true');
+    }
+
+    // Сохранение в центральную картотеку Supabase
+    if (supabase) {
+      try {
+        await supabase.from('residents').upsert({
+          passport_number: calculatedNumber,
+          series: calculatedSeries,
+          name: document.getElementById('pName').innerText,
+          profession: document.getElementById('pProf').innerText,
+          address: document.getElementById('pAddress').innerText
+        });
+      } catch(e) { console.warn("Supabase upsert:", e); }
     }
 
     modalBackdrop.style.display = 'none';
     playStampThud();
   });
 
+  // ВВОД ПЕРСОНАЛЬНОГО КОДА РАЗБЛОКИРОВКИ
   document.getElementById('enterCodeLink').addEventListener('click', () => {
     const code = prompt('Введите служебный код предписания ЖЭК:');
     if (!code) return;
     const cleanCode = code.trim().toUpperCase();
-    if (cleanCode.startsWith('ИСТОК-') || cleanCode === 'СМУТА-84' || cleanCode === 'ЖЭК-ДОПУСК') {
+
+    // Мастер-коды
+    if (cleanCode === 'СМУТА-84' || cleanCode === 'ЖЭК-ДОПУСК') {
       syncSet('istok_name_locked', 'false');
       syncSet('istok_prof_locked', 'false');
       syncSet('istok_addr_locked', 'false');
-      alert('СЛУЖЕБНОЕ ПРЕДПИСАНИЕ ПРИНЯТО:\nПечать снята. Все графы открыты для повторного заполнения.');
+      alert('МАСТЕР-ДОПУСК ПРИНЯТ: Все графы открыты для повторного внесения.');
       modalBackdrop.style.display = 'none';
       playStampThud();
+      return;
+    }
+
+    // Персональный код жителя (ИСТОК-НОМЕР-ХХХХ)
+    const parts = cleanCode.split('-');
+    if (parts.length === 3 && parts[0] === 'ИСТОК') {
+      const codeTargetPassport = parts[1];
+      
+      if (codeTargetPassport !== calculatedNumber) {
+        alert(`ОТКАЗ В ДОСТУПЕ:\nДанное предписание выписано на гражданина №${codeTargetPassport}.\nВаш номер в картотеке — №${calculatedNumber}.\nПопытка использования чужого документа зафиксирована комендатурой.`);
+        return;
+      }
+
+      const expectedCode = generateUserToken(calculatedNumber);
+      if (cleanCode === expectedCode) {
+        syncSet('istok_name_locked', 'false');
+        syncSet('istok_prof_locked', 'false');
+        syncSet('istok_addr_locked', 'false');
+        alert('СЛУЖЕБНОЕ ПРЕДПИСАНИЕ ПОДТВЕРЖДЕНО:\nЛичность верифицирована. Печать снята. Вы можете заново выбрать данные.');
+        modalBackdrop.style.display = 'none';
+        playStampThud();
+      } else {
+        alert('ОШИБКА: Контрольная сумма предписания не совпадает. Код аннулирован.');
+      }
     } else {
-      alert('ОШИБКА: Недействительный или просроченный код предписания.');
+      alert('ОШИБКА: Недействительный формат служебного кода.');
     }
   });
 
-  // 11. ФУНКЦИИ ПУЛЬТА КОМЕНДАНТА
+  // 11. ПУЛЬТ КОМЕНДАНТА
   document.getElementById('adminResetSelfBtn').addEventListener('click', () => {
     syncSet('istok_name_locked', 'false');
     syncSet('istok_prof_locked', 'false');
@@ -1049,33 +1099,54 @@
     playStampThud();
   });
 
-  document.getElementById('genTokenBtn').addEventListener('click', () => {
-    const randomCode = 'ИСТОК-' + Math.floor(1000 + Math.random() * 9000);
-    document.getElementById('tokenDisplay').innerText = randomCode;
+  // Генерация персонального предписания
+  document.getElementById('genPersonalTokenBtn').addEventListener('click', () => {
+    const targetNum = document.getElementById('targetPassportInput').value.trim();
+    if (targetNum.length !== 6 || isNaN(targetNum)) {
+      alert('Укажите корректный 6-значный номер паспорта жителя.');
+      return;
+    }
+    const token = generateUserToken(targetNum);
+    document.getElementById('tokenDisplay').innerText = token;
     playStampThud();
-    alert(`Код предписания сформирован: ${randomCode}\nОтправьте его игроку для разблокировки паспорта.`);
+    alert(`Персональное предписание сформировано:\n${token}\n\nОтправьте его жителю №${targetNum}. Ни один другой игрок не сможет им воспользоваться.`);
   });
 
-  document.getElementById('addAdminBtn').addEventListener('click', () => {
-    const num = document.getElementById('newAdminNumInput').value.trim();
-    if (num.length >= 5) {
-      adminList.push(num);
-      localStorage.setItem('istok_admin_list', JSON.stringify(adminList));
-      alert(`Номер ${num} добавлен в список комендантов посёлка.`);
+  // Загрузка живого списка из Supabase
+  document.getElementById('refreshRegistryBtn').addEventListener('click', async () => {
+    const display = document.getElementById('registryDisplay');
+    if (!supabase) {
+      display.innerHTML = `<span style="color:#ff5555;">База данных не подключена.</span>`;
+      return;
+    }
+    display.innerText = 'Запрос к реестру посёлка...';
+    try {
+      const { data, error } = await supabase.from('residents').select('*').order('registered_at', { ascending: false });
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        display.innerText = 'В картотеке пока нет зарегистрированных жителей.';
+        return;
+      }
+      display.innerHTML = data.map(r => `
+        <div class="registry-item">
+          <strong>[${r.series} №${r.passport_number}]</strong><br>
+          Гражданин: <span style="color:#4cc9f0;">${r.name}</span><br>
+          Профессия: ${r.profession} | Адрес: ${r.address}
+        </div>
+      `).join('');
       playStampThud();
-    } else {
-      alert('Укажите корректный номер удостоверения.');
+    } catch(err) {
+      display.innerHTML = `<span style="color:#ff5555;">Ошибка запроса: ${err.message}</span>`;
     }
   });
 
-  // 12. ЭКСПОРТ В ФОТО (С ИСПРАВЛЕНИЕМ ОБРАТНОЙ СТОРОНЫ)
+  // 12. ЭКСПОРТ В ФОТО
   const exportBtn = document.getElementById('exportBtn');
   exportBtn.addEventListener('click', () => {
     const normalizedY = ((currentRotY % 360) + 360) % 360;
     const isBackFacing = normalizedY > 90 && normalizedY < 270;
     const targetElement = isBackFacing ? document.getElementById('passportBack') : document.getElementById('passportFront');
 
-    // Временно сохраняем и сбрасываем 3D-поворот для корректного рендера
     const prevWrapTransform = card.style.transform;
     const prevTargetTransform = targetElement.style.transform;
     card.style.transform = 'none';
@@ -1096,7 +1167,7 @@
     });
   });
 
-  // 13. РАДИОСКАНЕР С НАДЕЖНЫМ ВОСПРОИЗВЕДЕНИЕМ WELCOME.MP3
+  // 13. РАДИОСКАНЕР
   let isRadioOn = false;
   let currentFreq = 64.0;
   const minFreq = 64.0, maxFreq = 108.0;
@@ -1117,7 +1188,6 @@
     const ctx = getAudioContext();
     if (ctx.state === 'suspended') ctx.resume();
 
-    // Шум эфира
     const bufferSize = ctx.sampleRate * 2;
     const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
@@ -1138,7 +1208,6 @@
     noiseGain.connect(ctx.destination);
     noiseNode.start();
 
-    // Свист гетеродина
     heterodyneWhistle = ctx.createOscillator();
     heterodyneGain = ctx.createGain();
     heterodyneWhistle.frequency.setValueAtTime(1000, ctx.currentTime);
@@ -1147,7 +1216,6 @@
     heterodyneGain.connect(ctx.destination);
     heterodyneWhistle.start();
 
-    // Генераторы станций
     stationOsc1 = ctx.createOscillator();
     stationOsc2 = ctx.createOscillator();
     stationGain = ctx.createGain();
@@ -1158,7 +1226,6 @@
     stationOsc1.start();
     stationOsc2.start();
 
-    // Подключение welcome.mp3 через Web Audio
     if (!voiceSource && voiceAudio) {
       try {
         voiceSource = ctx.createMediaElementSource(voiceAudio);
@@ -1210,7 +1277,6 @@
         heterodyneGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
       }
 
-      // 68.2 МГц: Голос
       if (activeStation.type === 'voice') {
         if (stationGain && ctx) stationGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
         if (voiceAudio) {
@@ -1222,7 +1288,6 @@
           }
         }
       } else {
-        // Другие сигналы
         if (isWebAudioVoiceActive && voiceGain && ctx) {
           voiceGain.gain.setTargetAtTime(0.0, ctx.currentTime, 0.05);
         } else if (voiceAudio) {
